@@ -127,8 +127,8 @@ def test_cost_function(plot=False):
         obstacle_map.render(ax)
         ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
         ax.plot(goal_pos_n2[0, 0], goal_pos_n2[0, 1], 'k*')
-        fig.savefig('./tmp/test_cost_function.png', bbox_inches='tight', pad_inches=0)
+        fig.savefig('./tests/cost/test_cost_function.png', bbox_inches='tight', pad_inches=0)
 
 
 if __name__ == '__main__':
-    test_cost_function(plot=False)
+    test_cost_function(plot=True)

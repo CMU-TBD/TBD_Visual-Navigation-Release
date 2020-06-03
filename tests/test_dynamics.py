@@ -99,7 +99,9 @@ def test_dubins_v1(visualize=False):
         xs, ys, ts = state_1k3[0, :, 0], state_1k3[0, :, 1], state_1k3[0, :, 2]
         ax.plot(xs, ys, 'r--')
         ax.quiver(xs, ys, np.cos(ts), np.sin(ts))
-        plt.show()
+        # plt.show()
+        fig.savefig("./tests/dynamics/test_dynamics1.png", bbox_inches='tight', pad_inches=0)
+
     else:
         print('rerun with visualize=True to visualize the test')
 
@@ -163,7 +165,9 @@ def test_dubins_v2(visualize=False):
         xs, ys, ts = state_1k3[0, :, 0], state_1k3[0, :, 1], state_1k3[0, :, 2]
         ax.plot(xs, ys, 'r--')
         ax.quiver(xs, ys, np.cos(ts), np.sin(ts))
-        plt.show()
+        # plt.show()
+        fig.savefig("./tests/dynamics/test_dynamics2.png", bbox_inches='tight', pad_inches=0)
+
     else:
         print('rerun with visualize=True to visualize the test')
 
@@ -221,6 +225,6 @@ def test_dubins_v3():
 
 
 if __name__ == '__main__':
-    test_dubins_v1(visualize=False)
-    test_dubins_v2(visualize=False)
+    test_dubins_v1(visualize=True)
+    test_dubins_v2(visualize=True)
     test_dubins_v3()

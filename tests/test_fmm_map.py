@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-
 def test_fmm_map():
     from utils.fmm_map import FmmMap
     # Create a grid and a function within that grid

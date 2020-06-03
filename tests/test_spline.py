@@ -59,7 +59,8 @@ def test_spline_3rd_order(visualize=False):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         spline_traj.render(ax, freq=4)
-        plt.show()
+        # plt.show()
+        fig.savefig('./tests/spline/test_spline.png', bbox_inches='tight', pad_inches=0)
 
 
 def test_spline_rescaling():
@@ -132,5 +133,5 @@ def test_spline_rescaling():
     
 
 if __name__ == '__main__':
-    test_spline_3rd_order(visualize=False)
+    test_spline_3rd_order(visualize=True)
     test_spline_rescaling()

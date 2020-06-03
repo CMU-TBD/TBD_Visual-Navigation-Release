@@ -389,7 +389,7 @@ class Trajectory(object):
 
     def render(self, axs, batch_idx=0, freq=4, plot_quiver=True, plot_heading=False,
                plot_velocity=False, label_start_and_end=False, name=''):
-        ax = axs[0]
+        ax = axs
         xs = self._position_nk2[batch_idx, :, 0]
         ys = self._position_nk2[batch_idx, :, 1]
         thetas = self._heading_nk1[batch_idx]

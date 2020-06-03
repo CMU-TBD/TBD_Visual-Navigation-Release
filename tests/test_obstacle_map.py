@@ -69,17 +69,17 @@ def test_sbpd_map(visualize=False):
     assert(np.allclose(obs_dists_nk, [0.59727454, 1.3223624, 0.47055122]))
 
     if visualize:
-        occupancy_grid_nn = obstacle_map.create_occupancy_grid()
+        #occupancy_grid_nn = obstacle_map.create_occupancy_grid(trajectory.position_nk2())
 
         fig = plt.figure()
         ax = fig.add_subplot(121)
         obstacle_map.render(ax)
 
         ax = fig.add_subplot(122)
-        ax.imshow(occupancy_grid_nn, cmap='gray', origin='lower')
+        # ax.imshow(occupancy_grid_nn, cmap='gray', origin='lower')
         ax.set_axis_off()
-        plt.show()
-
+        # plt.show()
+        fig.savefig('./tests/obstacles/test_obstacle_map.png', bbox_inches='tight', pad_inches=0)
 
 if __name__ == '__main__':
-    test_sbpd_map(visualize=False)
+    test_sbpd_map(visualize=True)

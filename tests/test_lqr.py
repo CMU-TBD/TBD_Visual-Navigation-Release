@@ -74,7 +74,8 @@ def test_lqr0(visualize=False):
         ax.scatter(pos_ref[:, 0], pos_ref[:, 1])
         ax.plot(pos_opt[:, 0], pos_opt[:, 1], 'b--', label='opt')
         ax.legend()
-        plt.show()
+        # plt.show()
+        fig.savefig('./tests/lqr/test_lqr1.png', bbox_inches='tight', pad_inches=0)
     else:
         print('rerun test_lqr0 with visualize=True to visualize the test')
 
@@ -126,7 +127,8 @@ def test_lqr1(visualize=False):
                   tf.cos(heading_opt), tf.sin(heading_opt))
         ax.legend()
 
-        plt.show()
+        # plt.show()
+        fig.savefig('./tests/lqr/test_lqr2.png', bbox_inches='tight', pad_inches=0)
     else:
         print('rerun test_lqr1 with visualize=True to visualize the test')
 
@@ -204,12 +206,14 @@ def test_lqr2(visualize=False):
         ax.set_title('Nonlinear Traj')
         ax.legend()
 
-        plt.show()
+        # plt.show()
+        fig.savefig('./tests/lqr/test_lqr3.png', bbox_inches='tight', pad_inches=0)
+
     else:
         print('rerun test_lqr2 with visualize=True to visualize the test')
 
 
 if __name__ == '__main__':
-    test_lqr0(visualize=False)  # robot should move to goal in 1 step and stay there
-    test_lqr1(visualize=False)  # robot should track a trajectory
-    test_lqr2(visualize=False)  # LQR should track 2 trajectories in a batch
+    test_lqr0(visualize=True)  # robot should move to goal in 1 step and stay there
+    test_lqr1(visualize=True)  # robot should track a trajectory
+    test_lqr2(visualize=True)  # LQR should track 2 trajectories in a batch
