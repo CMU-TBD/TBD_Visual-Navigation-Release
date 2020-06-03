@@ -39,13 +39,20 @@ In the terminal from the root directory of the project run the following command
 1. cd mp_env
 2. bash patches/apply_patches_3.sh
 ```
-If the script fails there are instructions in apply_patches_3.sh describing how to manually apply the patch.
+If the script fails there are instructions in apply_patches_3.sh describing how to manually apply the patch. Additionally, the failure may be due to a bug in this version of `pyassimp` which can be fixed by following [this commit](https://github.com/assimp/assimp/commit/b6d3cbcb61f4cc4c42678d5f183351f95c97c8d4) and simply changing `isinstance(obj,int)` to `isinstance(obj, (int, str, bytes))` on line 96 of `anaconda3/envs/tbd_humanav/lib/python3.6/site-packages/pyassimp/core.py`. Then try running the patches again, or manually (not recommended).
 
 #### Install Libassimp-dev
 In the terminal run:
 ```
 sudo apt-get install libassimp-dev
 ```
+#### Install pip/conda packages
+In the terminal (and in the virtual environment from above [`tbd_lab`]) run:
+```
+chmod a+x get_packages.sh
+./get_packages.sh
+```
+The script should inform you of all packages being installed and their status, to install manually just look inside
 
 ### Download and unzip the necessary data from Google Drive (~3.1 GB).
 To run our code you will need to download data from google drive which includes checkpoints from our pretrained models, and data needed for testing agents on a set of navigational problems in previously unseen (at training time) simulated buildings from the Stanford Building Parser Dataset.
