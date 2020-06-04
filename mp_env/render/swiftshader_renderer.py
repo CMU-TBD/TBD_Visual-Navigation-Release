@@ -78,7 +78,8 @@ class Shape():
     self.meshes = [scene.meshes[i] for i in filter_ind]
     for i, m in enumerate(self.meshes):
       m.name = name_prefix + m.name + '_{:05d}'.format(i) + name_suffix
-    logging.error('#Meshes: %d', len(self.meshes))
+    # logging.error('#Meshes: %d', len(self.meshes))
+    print('\033[35m', "Number of Meshes:", len(self.meshes), '\033[0m')
 
     dir_name = os.path.dirname(obj_file)
     # Load materials
@@ -108,6 +109,7 @@ class Shape():
             img_rgb = cv2.resize(img_rgb, (sz,sz), interpolation=cv2.INTER_LINEAR)
         materials.append((file_name, img_rgb))
     self.scene = scene
+    print('\033[32m', "All meshes successfully loaded", '\033[0m')
     self.materials = materials
 
   def _filter_triangles(self, meshes):
@@ -154,8 +156,11 @@ class Shape():
     return p, face_areas, face_idx
   
   def __del__(self):
-    scene = self.scene
-    assimp.release(scene)
+    # These caused several error mesages that would be much neater to 
+    # simply comment out. For readibility's sake
+    placeholder=1
+    #scene = self.scene
+    #assimp.release(scene)
 
 class SwiftshaderRenderer():
   def __init__(self):
