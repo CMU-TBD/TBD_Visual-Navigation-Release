@@ -63,6 +63,7 @@ class Trajectory(object):
                 # Rotational trajectories
                 self._heading_nk1 = tfe.Variable(tf.zeros([n, k, 1], dtype=dtype) if heading_nk1 is None
                                                  else tf.constant(heading_nk1, dtype=dtype))
+                print(self._heading_nk1)
                 self._angular_speed_nk1 = tfe.Variable(tf.zeros([n, k, 1], dtype=dtype) if angular_speed_nk1 is None
                                                        else tf.constant(angular_speed_nk1, dtype=dtype))
                 self._angular_acceleration_nk1 = tfe.Variable(
@@ -389,16 +390,20 @@ class Trajectory(object):
 
     def render(self, axs, batch_idx=0, freq=4, plot_quiver=True, plot_heading=False,
                plot_velocity=False, label_start_and_end=False, name=''):
-        ax = axs
+        ax = axs[0][0]
         xs = self._position_nk2[batch_idx, :, 0]
         ys = self._position_nk2[batch_idx, :, 1]
         thetas = self._heading_nk1[batch_idx]
         ax.plot(xs, ys, 'r-')
-
+        print(self._position_nk2)
+        print(xs[self.k - 1])
+        print(ys[self.k - 1])
+        print(xs[::(freq)])
+        print(ys[::(freq)])
+        
         if plot_quiver:
-            ax.quiver(xs[::freq], ys[::freq],
-                      tf.cos(thetas[::freq]), tf.sin(thetas[::freq]))
-
+            ax.quiver(xs[::freq], ys[::freq], tf.cos(thetas[::freq]), tf.sin(thetas[::freq]))
+        print('\033[33m', "Rendering Trajectory", '\033[0m')
         title_str = '{:s} Trajectory'.format(name)
         if label_start_and_end:
             start_5 = self.position_heading_speed_and_angular_speed_nk5()[batch_idx, 0]
@@ -406,24 +411,27 @@ class Trajectory(object):
             title_str += ('\nStart: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]\n'.format(*start_5) +
                           'End: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]'.format(*end_5))
         ax.set_title(title_str)
-
         i = 1
         if plot_heading:
-            ax = axs[i]
+            print('\033[33m', "Plotting Heading", '\033[0m')
+            ax = axs[i][0]
             ax.plot(np.r_[:self.k]*self.dt, self._heading_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Theta')
             i += 1
 
+
         if plot_velocity:
+            print('\033[33m', "Plotting Velocity", '\033[0m')
             time = np.r_[:self.k]*self.dt
 
-            ax = axs[i]
+            ax = axs[i][0]
             ax.plot(time, self._speed_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Linear Velocity')
 
-            ax = axs[i+1]
+            ax = axs[i+1][0]
             ax.plot(time, self._angular_speed_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Angular Velocity')
+
 
 
 class SystemConfig(Trajectory):

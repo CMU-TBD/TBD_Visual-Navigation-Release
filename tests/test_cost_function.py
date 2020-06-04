@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 tf.enable_eager_execution()
 
@@ -98,13 +99,20 @@ def test_cost_function(plot=False):
     objective3 = AngleDistance(params=p.goal_angle_objective, fmm_map=fmm_map)
     
     # Define a set of positions and evaluate objective
-    pos_nk2 = tf.constant([[[8., 16.], [8., 12.5], [18., 16.5]]], dtype=tf.float32)
-    trajectory = Trajectory(dt=0.1, n=1, k=3, position_nk2=pos_nk2)
-    
+    pos_nk2 = tf.constant([[[8., 12.5], [8., 16.], [18., 16.5]]], dtype=tf.float32)
+    # theta_nk2 = tf.constant([[[2.], [0.1], [1.4]]], dtype=tf.float32)
+    trajectory = Trajectory(dt=0.1, n=1, k=3, position_nk2=pos_nk2, heading_nk1=[[[np.pi/2.0], [0.1], [0.1]]])
+    trajectory.update_valid_mask_nk()
+    # print(trajectory.valid_horizons_n1)
+    fig = plt.figure()
+    fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
+    trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
+    fig.savefig('./tests/cost/trajectory.png', bbox_inches='tight', pad_inches=0)
+
     # Compute the objective function
     values_by_objective = objective_function.evaluate_function_by_objective(trajectory)
     overall_objective = objective_function.evaluate_function(trajectory)
-
+    
     # Expected objective values
     expected_objective1 = objective1.evaluate_objective(trajectory)
     expected_objective2 = objective2.evaluate_objective(trajectory)
@@ -120,10 +128,8 @@ def test_cost_function(plot=False):
     # Optionally visualize the traversable and the points on which
     # we compute the objective function
     if plot:
-        import matplotlib.pyplot as plt
-
         fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = fig.add_subplot(1,1,1)
         obstacle_map.render(ax)
         ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
         ax.plot(goal_pos_n2[0, 0], goal_pos_n2[0, 1], 'k*')

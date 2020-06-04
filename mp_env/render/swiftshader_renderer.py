@@ -24,7 +24,7 @@ r"""Implements loading and rendering of meshes. Contains 2 classes:
     here. 
 """
 
-import numpy as np, os
+import numpy as np, os, sys
 import cv2, ctypes, logging, os, glob, numpy as np
 import pyassimp as assimp
 from OpenGL.GLES2 import *
@@ -89,8 +89,10 @@ class Shape():
       for m in self.meshes:
         #file_name = os.path.join(dir_name, m.material.properties[('file', 1)])
         file_name = os.path.join(dir_name, sorted(glob.glob1(dir_name, '*.jpg'))[i])
-        assert(os.path.exists(file_name)), \
-            'Texture file {:s} foes not exist.'.format(file_name)
+        # assert(os.path.exists(file_name)), 'Texture file {:s} foes not exist.'.format(file_name)
+        if(not(os.path.exists(file_name))):
+          print('\033[31m', "Texture file", file_name, "does not exist.", '\033[0m')
+          sys.exit(1)
         img_rgb = cv2.imread(file_name)[::-1,:,::-1]
         if img_rgb.shape[0] != img_rgb.shape[1]:
           logging.warn('Texture image not square.')
