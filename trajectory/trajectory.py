@@ -63,7 +63,6 @@ class Trajectory(object):
                 # Rotational trajectories
                 self._heading_nk1 = tfe.Variable(tf.zeros([n, k, 1], dtype=dtype) if heading_nk1 is None
                                                  else tf.constant(heading_nk1, dtype=dtype))
-                print(self._heading_nk1)
                 self._angular_speed_nk1 = tfe.Variable(tf.zeros([n, k, 1], dtype=dtype) if angular_speed_nk1 is None
                                                        else tf.constant(angular_speed_nk1, dtype=dtype))
                 self._angular_acceleration_nk1 = tfe.Variable(
@@ -395,11 +394,6 @@ class Trajectory(object):
         ys = self._position_nk2[batch_idx, :, 1]
         thetas = self._heading_nk1[batch_idx]
         ax.plot(xs, ys, 'r-')
-        print(self._position_nk2)
-        print(xs[self.k - 1])
-        print(ys[self.k - 1])
-        print(xs[::(freq)])
-        print(ys[::(freq)])
         
         if plot_quiver:
             ax.quiver(xs[::freq], ys[::freq], tf.cos(thetas[::freq]), tf.sin(thetas[::freq]))
