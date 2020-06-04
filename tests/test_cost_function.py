@@ -109,13 +109,13 @@ def test_cost_function(plot=False):
     expected_objective1 = objective1.evaluate_objective(trajectory)
     expected_objective2 = objective2.evaluate_objective(trajectory)
     expected_objective3 = objective3.evaluate_objective(trajectory)
-    expected_overall_objective = tf.reduce_mean(expected_objective1 + expected_objective2 + expected_objective3, axis=1)
-
+    # expected_overall_objective = tf.reduce_mean(expected_objective1 + expected_objective2 + expected_objective3, axis=1)
+    expected_overall_objective = np.mean(expected_objective1 + expected_objective2 + expected_objective3, axis=1)
     assert len(values_by_objective) == 3
     assert values_by_objective[0][1].shape == (1, 3)
     assert overall_objective.shape == (1,)
-    assert np.allclose(overall_objective.numpy(), expected_overall_objective.numpy(), atol=1e-2)
-
+    # assert np.allclose(overall_objective.numpy(), expected_overall_objective.numpy(), atol=1e-2)
+    assert np.allclose(overall_objective.numpy(), expected_overall_objective, atol=1e-2)
 
     # Optionally visualize the traversable and the points on which
     # we compute the objective function
