@@ -159,15 +159,18 @@ def test_cost_function(plot=False):
     spline_traj = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
     spline_traj.fit(start_config, middle_config, factors=None)
     spline_traj.eval_spline(ts_nk, calculate_speeds=True)
+    
     spline_traj2 = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
     spline_traj2.fit(middle_config, goal_config, factors=None)
     spline_traj2.eval_spline(ts_nk, calculate_speeds=True)
+
+    spline_traj.append_along_time_axis(spline_traj2)
 
     fig = plt.figure()
     fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
     spline_traj.render(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
     # trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
-    fig.savefig('./tests/cost/trajectory1.png', bbox_inches='tight', pad_inches=0)
+    fig.savefig('./tests/cost/trajectory.png', bbox_inches='tight', pad_inches=0)
 
     # Compute the objective function
     values_by_objective = objective_function.evaluate_function_by_objective(trajectory)
