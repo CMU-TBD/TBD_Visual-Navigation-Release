@@ -144,13 +144,13 @@ def test_cost_function(plot=False):
         if(next_config is not None):
             prev_config = copy.deepcopy(next_config)
         # Generate position
-        posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0]
-        posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1]
-        pos_nk2 = tf.concat([posx_nk1, posy_nk1], axis=2)
+        s_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0]
+        s_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1]
+        s_pos_nk2 = tf.concat([s_posx_nk1, s_posy_nk1], axis=2)
         # Generate speed and heading
         heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*s[2]
         speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*s[3]
-        next_config = SystemConfig(dt, n, 1, position_nk2=pos_nk2, speed_nk1=speed_nk1, heading_nk1=heading_nk1, variable=False)
+        next_config = SystemConfig(dt, n, 1, position_nk2=s_pos_nk2, speed_nk1=speed_nk1, heading_nk1=heading_nk1, variable=False)
 
         # Append to the trajectory if there is a past version
         if(prev_config is not None):
