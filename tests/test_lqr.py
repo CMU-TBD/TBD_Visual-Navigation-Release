@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-tf.enable_eager_execution()
+#tf.enable_eager_execution()
 import matplotlib.pyplot as plt
 from costs.quad_cost_with_wrapping import QuadraticRegulatorRef
 from optCtrl.lqr import LQRSolver
@@ -8,7 +8,7 @@ from systems.dubins_v1 import DubinsV1
 from dotmap import DotMap
 
 
-def create_params():
+def create_params_2():
     p = DotMap()
     p.seed = 1
     p.n = 5
