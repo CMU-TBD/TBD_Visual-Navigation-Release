@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import copy
 import tensorflow as tf
 tf.enable_eager_execution()
 from obstacles.sbpd_map import SBPDMap
@@ -142,21 +141,26 @@ def test_cost_function(plot=False):
         spline_traj = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
         # Keep track of old trajectory
         if(next_config is not None):
-            prev_config = copy.deepcopy(next_config)
+            # Rewrite the previous state config with the 'old' next one
+            prev_config = next_config
         # Generate position
-        s_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0]
-        s_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1]
-        s_pos_nk2 = tf.concat([s_posx_nk1, s_posy_nk1], axis=2)
+        s_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0] # X position matrix
+        s_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1] # Y position matrix
+        s_pos_nk2 = tf.concat([s_posx_nk1, s_posy_nk1], axis=2)  # combined matrix of (X,Y)
         # Generate speed and heading
-        heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*s[2]
-        speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*s[3]
-        next_config = SystemConfig(dt, n, 1, position_nk2=s_pos_nk2, speed_nk1=speed_nk1, heading_nk1=heading_nk1, variable=False)
-
+        heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[2]# Theta angle matrix
+        speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[3]  # Speed matrix
+        next_config = SystemConfig(dt, n, 1, 
+                                    position_nk2=s_pos_nk2, 
+                                    speed_nk1=speed_nk1, 
+                                    heading_nk1=heading_nk1, 
+                                    variable=False
+                                  )
         # Append to the trajectory if there is a past version
         if(prev_config is not None):
             spline_traj.fit(prev_config, next_config, factors=None)
             spline_traj.eval_spline(ts_nk, calculate_speeds=True)
-            splines.append(copy.deepcopy(spline_traj))
+            splines.append(spline_traj)
     
     # Loop through all calculated splines to combine them together into a singular one
     final_spline = None
@@ -165,7 +169,7 @@ def test_cost_function(plot=False):
             final_spline.append_along_time_axis(s)
         if(i == 0):
             # For first spline
-            final_spline = copy.deepcopy(s)
+            final_spline = s
 
     fig = plt.figure()
     fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
