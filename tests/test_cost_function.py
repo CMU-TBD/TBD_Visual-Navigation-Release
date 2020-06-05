@@ -118,106 +118,56 @@ def test_cost_function(plot=False):
 
     #Testing with splines
     np.random.seed(seed=1)
-    n = 5
-    dt = .01
-    k = 100
+    n = 5    # Batch size (unused now)
+    dt = .01 # delta-t: time intervals
+    k = 100  # Number of time-steps (should be 1/dt)
 
-    target_state = (18, 16.5, np.pi/2.0)   # Goal State (x, y, theta)
-    v0 = np.random.uniform(0., 0.5, 1)[0]  # Initial speed
-    vf = 0.
+    target_state = (18, 16.5, np.pi/2.0, 0.2)   # Start State (x, y, theta, vel)
+    middle_state = (15, 14.5, np.pi/2.0, 0.8)   # Middle State (x, y, theta, vel)
+    start_state = (8, 12, np.pi/2.0, 0.5)       # Goal State (x, y, theta, vel)
 
-    # Initial SystemConfig is [0, 0, 0, v0, 0]
-    start_speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*v0
-    start_heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*np.pi/2.
-    # start_heading_nk1 = tf.constant([[[np.pi/2.]]], dtype=tf.float32)
-
-    print(target_state)
-    print(v0)
+    # Generate start position
+    start_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * start_state[0]
+    start_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * start_state[1]
+    start_pos_nk2 = tf.concat([start_posx_nk1, start_posy_nk1], axis=2)
+    # Generate start speed and heading
+    start_heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*start_state[2]
+    start_speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*start_state[3]
     
+    # Generate middle position
+    middle_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * middle_state[0]
+    middle_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * middle_state[1]
+    middle_pos_nk2 = tf.concat([middle_posx_nk1, middle_posy_nk1], axis=2)
+    # Generate middle speed and heading
+    middle_heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*middle_state[2]
+    middle_speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32)*middle_state[3]
+    
+    # Generate goal position
     goal_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * target_state[0]
     goal_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * target_state[1]
     goal_pos_nk2 = tf.concat([goal_posx_nk1, goal_posy_nk1], axis=2)
+    # Generate goal speed and heading
     goal_heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * target_state[2]
-    goal_speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * vf
+    goal_speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * target_state[3]
 
-    start_config = SystemConfig(dt, n, 1, speed_nk1=start_speed_nk1, heading_nk1=start_heading_nk1, variable=False)
-    goal_config = SystemConfig(dt, n, 1, position_nk2=goal_pos_nk2,
-                               speed_nk1=goal_speed_nk1, heading_nk1=goal_heading_nk1,
-                               variable=True)
+    start_config = SystemConfig(dt, n, 1, position_nk2=start_pos_nk2, speed_nk1=start_speed_nk1, heading_nk1=start_heading_nk1, variable=False)
+    middle_config = SystemConfig(dt, n, 1, position_nk2=middle_pos_nk2, speed_nk1=middle_speed_nk1, heading_nk1=middle_heading_nk1, variable=False)
+    goal_config = SystemConfig(dt, n, 1, position_nk2=goal_pos_nk2, speed_nk1=goal_speed_nk1, heading_nk1=goal_heading_nk1, variable=True)
 
-    start_nk5 = start_config.position_heading_speed_and_angular_speed_nk5()
-    start_n5 = start_nk5[:, 0]
-
-    goal_nk5 = goal_config.position_heading_speed_and_angular_speed_nk5()
-    goal_n5 = goal_nk5[:, 0]
     p = DotMap(spline_params=DotMap(epsilon=1e-5))
     ts_nk = tf.tile(tf.linspace(0., dt*k, k)[None], [n, 1])
     spline_traj = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
-    spline_traj.fit(start_config, goal_config, factors=None)
+    spline_traj.fit(start_config, middle_config, factors=None)
     spline_traj.eval_spline(ts_nk, calculate_speeds=True)
+    spline_traj2 = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
+    spline_traj2.fit(middle_config, goal_config, factors=None)
+    spline_traj2.eval_spline(ts_nk, calculate_speeds=True)
 
-    pos_nk3 = spline_traj.position_and_heading_nk3()
-    v_nk1 = spline_traj.speed_nk1()
-
-    #Trying with the lqr tests
-    # p = create_params_2()
-    # np.random.seed(seed=1)
-    # n, k = 2, 50
-    # dt = p.dt
-
-    # db = DubinsV1(dt, params=p.system_dynamics_params.simulation_params)
-    # x_dim, u_dim = db._x_dim, db._u_dim
-
-    # x_n13 = tf.constant(np.zeros((n, 1, x_dim)), dtype=tf.float32)
-    # v_1k, w_1k = np.ones((k-1, 1))*.1, np.linspace(.5, .3, k-1)[:, None]
-
-    # u_1k2 = tf.constant(np.concatenate([v_1k, w_1k], axis=1)[None],
-    #                     dtype=tf.float32)
-    # u_nk2 = tf.zeros((n, k-1, 2), dtype=tf.float32)+u_1k2
-    # trajectory_ref = db.simulate_T(x_n13, u_nk2, T=k)
-
-    # x_nk3, u_nk2 = db.parse_trajectory(trajectory_ref)
-
-    # # stack two different reference trajectories together
-    # # to verify that batched LQR works across the batch dim
-    # goal_x, goal_y = 18, 16.0
-    # goal = np.array([goal_x, goal_y, 0.], dtype=np.float32)
-    # x_ref_nk3 = tf.constant(np.tile(goal, (1, k, 1)))
-    # u_ref_nk2 = tf.constant(np.zeros((1, k, u_dim), dtype=np.float32))
-    # x_nk3 = tf.concat([x_ref_nk3, x_nk3[0:1]], axis=0)
-    # u_nk2 = tf.concat([u_ref_nk2, u_nk2[0:1]], axis=0)
-    # trajectory_ref = db.assemble_trajectory(x_nk3, u_nk2)
-
-    # cost_fn = QuadraticRegulatorRef(trajectory_ref, db, p)
-
-    # x_nk3 = tf.constant(np.zeros((n, k, x_dim), dtype=np.float32))
-    # u_nk2 = tf.constant(np.zeros((n, k, u_dim), dtype=np.float32))
-    # trajectory = db.assemble_trajectory(x_nk3, u_nk2)
-
-    # lqr_solver = LQRSolver(T=k-1, dynamics=db, cost=cost_fn)
-
-    # start_config = db.init_egocentric_robot_config(dt=dt, n=n)
-    # lqr_res = lqr_solver.lqr(start_config, trajectory, verbose=False)
-    # trajectory = lqr_res['trajectory_opt']
-
-    # Trying with dynamics model:
-    # dt = 0.1
-    # x_dim, u_dim = 5, 2
-    # n, k = 17, 12
-    # ctrl = 1
-    # db = DubinsV3(dt, create_system_dynamics_params())
-    # state_n15 = tf.constant(np.zeros((n, 1, x_dim)), dtype=tf.float32)
-    # ctrl_nk2 = tf.constant(np.ones((n, k, u_dim))*ctrl, dtype=tf.float32)
-    # trajectory = db.simulate_T(state_n15, ctrl_nk2, T=k)
-    # state_nk5 = trajectory.position_heading_speed_and_angular_speed_nk5()
-    # trajectory = db.assemble_trajectory(state_nk5[:, :-1], theta_nk2)
-
-    # print(trajectory.valid_horizons_n1)
     fig = plt.figure()
     fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
-    spline_traj.render(ax, freq=4)
+    spline_traj.render(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
     # trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
-    fig.savefig('./tests/cost/trajectory.png', bbox_inches='tight', pad_inches=0)
+    fig.savefig('./tests/cost/trajectory1.png', bbox_inches='tight', pad_inches=0)
 
     # Compute the objective function
     values_by_objective = objective_function.evaluate_function_by_objective(trajectory)
