@@ -85,6 +85,11 @@ def create_params():
 
 
 def test_cost_function(plot=False):
+    """
+    Creating objective points maually, plotting them in the ObjectiveFunction
+    class, and then asserting that combined, their sum adds up to the same
+    objective cost as the sum of the individual trajectories
+    """
     # Create parameters
     p = create_params()
 
@@ -93,13 +98,12 @@ def test_cost_function(plot=False):
     map_size_2 = obstacle_occupancy_grid.shape[::-1]
 
     # Define a goal position and compute the corresponding fmm map
-    goal_pos_n2 = np.array([[20., 16.5]])
+    goal_pos_n2 = np.array([[20., 16.5], [8., 16.5]])
     fmm_map = FmmMap.create_fmm_map_based_on_goal_position(goal_positions_n2=goal_pos_n2,
                                                            map_size_2=map_size_2,
                                                            dx=0.05,
                                                            map_origin_2=[0., 0.],
                                                            mask_grid_mn=obstacle_occupancy_grid)
-   
     # Define the cost function
     objective_function = ObjectiveFunction(p.objective_fn_params)
     objective_function.add_objective(ObstacleAvoidance(params=p.avoid_obstacle_objective, obstacle_map=obstacle_map))
@@ -125,10 +129,10 @@ def test_cost_function(plot=False):
     # States represents each individual tangent point that the spline will pass through
     # states[0] = initial state, and states[len(states) - 1] = terminal state
     states = [
-        (8, 12, np.pi/2.0, 0.5),    # Start State (x, y, theta, vel)
-        (15, 14.5, np.pi/2.0, 0.8), # Middle State (x, y, theta, vel)
-        (10, 15, -np.pi/2.0, 1),    # Middle State (x, y, theta, vel)
-        (18, 16.5, np.pi/2.0, 0.2)  # Goal State (x, y, theta, vel)
+            (8, 12, np.pi/2.0, 0.5),    # Start State (x, y, theta, vel)
+            (15, 14.5, np.pi/2.0, 0.8), # Middle State (x, y, theta, vel)
+            (10, 15, -np.pi/2.0, 1),    # Middle State (x, y, theta, vel)
+            (18, 16.5, np.pi/2.0, 0.2)  # Goal State (x, y, theta, vel)
         ]
 
     p = DotMap(spline_params=DotMap(epsilon=1e-5))
@@ -156,7 +160,8 @@ def test_cost_function(plot=False):
                                     heading_nk1=heading_nk1, 
                                     variable=False
                                   )
-        # Append to the trajectory if there is a past version
+        # Append to the trajectory if a new trajectory can be constructed 
+        # Note that any spline needs a 'previous' and 'next' state
         if(prev_config is not None):
             spline_traj.fit(prev_config, next_config, factors=None)
             spline_traj.eval_spline(ts_nk, calculate_speeds=True)

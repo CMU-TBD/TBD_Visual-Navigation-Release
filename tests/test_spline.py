@@ -8,6 +8,11 @@ tf.enable_eager_execution()
 
 
 def test_spline_3rd_order(visualize=False):
+    """
+    Create a start and goal states, fit a spline from the two points
+    assert tests ensure that the difference between the computed points
+    and their manually computed points is very small (they are close)
+    """
     np.random.seed(seed=1)
     n = 5
     dt = .01
