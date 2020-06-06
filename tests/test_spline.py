@@ -62,11 +62,75 @@ def test_spline_3rd_order(visualize=False):
 
     if visualize:
         fig = plt.figure()
-        ax = fig.add_subplot(111)
+        # ax = fig.add_subplot(111)
+        fig, ax = plt.subplots(1,1, squeeze=False)
+
         spline_traj.render(ax, freq=4)
         # plt.show()
         fig.savefig('./tests/spline/test_spline.png', bbox_inches='tight', pad_inches=0)
 
+def test_piecewise_spline():
+    #Testing with splines
+    np.random.seed(seed=1)
+    n = 5    # Batch size (unused now)
+    dt = .01 # delta-t: time intervals
+    k = 100  # Number of time-steps (should be 1/dt)
+
+    # States represents each individual tangent point that the spline will pass through
+    # states[0] = initial state, and states[len(states) - 1] = terminal state
+    states = [
+            (8, 12, np.pi/2.0, 0.5),    # Start State (x, y, theta, vel)
+            (15, 14.5, np.pi/2.0, 0.8), # Middle State (x, y, theta, vel)
+            (10, 15, -np.pi/2.0, 1),    # Middle State (x, y, theta, vel)
+            (18, 16.5, np.pi/2.0, 0.2)  # Goal State (x, y, theta, vel)
+        ]
+
+    p = DotMap(spline_params=DotMap(epsilon=1e-5))
+    ts_nk = tf.tile(tf.linspace(0., dt*k, k)[None], [n, 1])
+    splines = []
+    prev_config = None
+    next_config = None
+    # Generate all two-point splines from the states
+    for s in states:
+        spline_traj = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
+        # Keep track of old trajectory
+        if(next_config is not None):
+            # Rewrite the previous state config with the 'old' next one
+            prev_config = next_config
+        # Generate position
+        s_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0] # X position matrix
+        s_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1] # Y position matrix
+        s_pos_nk2 = tf.concat([s_posx_nk1, s_posy_nk1], axis=2)  # combined matrix of (X,Y)
+        # Generate speed and heading
+        heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[2]# Theta angle matrix
+        speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[3]  # Speed matrix
+        next_config = SystemConfig(dt, n, 1, 
+                                    position_nk2=s_pos_nk2, 
+                                    speed_nk1=speed_nk1, 
+                                    heading_nk1=heading_nk1, 
+                                    variable=False
+                                  )
+        # Append to the trajectory if a new trajectory can be constructed 
+        # Note that any spline needs a 'previous' and 'next' state
+        if(prev_config is not None):
+            spline_traj.fit(prev_config, next_config, factors=None)
+            spline_traj.eval_spline(ts_nk, calculate_speeds=True)
+            splines.append(spline_traj)
+    
+    # Loop through all calculated splines to combine them together into a singular one
+    final_spline = None
+    for i, s in enumerate(splines):
+        if(final_spline is not None):
+            final_spline.append_along_time_axis(s)
+        if(i == 0):
+            # For first spline
+            final_spline = s
+
+    fig = plt.figure()
+    fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
+    final_spline.render(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
+    # trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
+    fig.savefig('./tests/spline/test_piecewise_spline.png', bbox_inches='tight', pad_inches=0)
 
 def test_spline_rescaling():
     # Set the random seed
@@ -140,3 +204,4 @@ def test_spline_rescaling():
 if __name__ == '__main__':
     test_spline_3rd_order(visualize=True)
     test_spline_rescaling()
+    test_piecewise_spline()

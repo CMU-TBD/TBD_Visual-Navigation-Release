@@ -9,19 +9,6 @@ from objectives.angle_distance import AngleDistance
 from objectives.objective_function import ObjectiveFunction
 from trajectory.trajectory import Trajectory
 from systems.dubins_v3 import DubinsV3
-# Testing with test_dynamics
-from tests.test_dynamics import create_system_dynamics_params
-
-# Testing with test_lqr
-from tests.test_lqr import create_params_2
-from costs.quad_cost_with_wrapping import QuadraticRegulatorRef
-from optCtrl.lqr import LQRSolver
-from systems.dubins_v1 import DubinsV1
-
-# Testing with test_splines
-from trajectory.trajectory import SystemConfig
-from trajectory.spline.spline_3rd_order import Spline3rdOrder
-
 from utils.fmm_map import FmmMap
 from dotmap import DotMap
 
@@ -119,68 +106,6 @@ def test_cost_function(plot=False):
     pos_nk2 = tf.constant([[[8., 12.5], [8., 16.], [18., 16.5]]], dtype=tf.float32)
     heading_nk2 = tf.constant([[[np.pi/2.0], [0.1], [0.1]]], dtype=tf.float32)
     trajectory = Trajectory(dt=0.1, n=1, k=3, position_nk2=pos_nk2, heading_nk1=heading_nk2)
-
-    #Testing with splines
-    np.random.seed(seed=1)
-    n = 5    # Batch size (unused now)
-    dt = .01 # delta-t: time intervals
-    k = 100  # Number of time-steps (should be 1/dt)
-
-    # States represents each individual tangent point that the spline will pass through
-    # states[0] = initial state, and states[len(states) - 1] = terminal state
-    states = [
-            (8, 12, np.pi/2.0, 0.5),    # Start State (x, y, theta, vel)
-            (15, 14.5, np.pi/2.0, 0.8), # Middle State (x, y, theta, vel)
-            (10, 15, -np.pi/2.0, 1),    # Middle State (x, y, theta, vel)
-            (18, 16.5, np.pi/2.0, 0.2)  # Goal State (x, y, theta, vel)
-        ]
-
-    p = DotMap(spline_params=DotMap(epsilon=1e-5))
-    ts_nk = tf.tile(tf.linspace(0., dt*k, k)[None], [n, 1])
-    splines = []
-    prev_config = None
-    next_config = None
-    # Generate all two-point splines from the states
-    for s in states:
-        spline_traj = Spline3rdOrder(dt=dt, k=k, n=n, params=p.spline_params)
-        # Keep track of old trajectory
-        if(next_config is not None):
-            # Rewrite the previous state config with the 'old' next one
-            prev_config = next_config
-        # Generate position
-        s_posx_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[0] # X position matrix
-        s_posy_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[1] # Y position matrix
-        s_pos_nk2 = tf.concat([s_posx_nk1, s_posy_nk1], axis=2)  # combined matrix of (X,Y)
-        # Generate speed and heading
-        heading_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[2]# Theta angle matrix
-        speed_nk1 = tf.ones((n, 1, 1), dtype=tf.float32) * s[3]  # Speed matrix
-        next_config = SystemConfig(dt, n, 1, 
-                                    position_nk2=s_pos_nk2, 
-                                    speed_nk1=speed_nk1, 
-                                    heading_nk1=heading_nk1, 
-                                    variable=False
-                                  )
-        # Append to the trajectory if a new trajectory can be constructed 
-        # Note that any spline needs a 'previous' and 'next' state
-        if(prev_config is not None):
-            spline_traj.fit(prev_config, next_config, factors=None)
-            spline_traj.eval_spline(ts_nk, calculate_speeds=True)
-            splines.append(spline_traj)
-    
-    # Loop through all calculated splines to combine them together into a singular one
-    final_spline = None
-    for i, s in enumerate(splines):
-        if(final_spline is not None):
-            final_spline.append_along_time_axis(s)
-        if(i == 0):
-            # For first spline
-            final_spline = s
-
-    fig = plt.figure()
-    fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
-    final_spline.render(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
-    # trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
-    fig.savefig('./tests/cost/trajectory.png', bbox_inches='tight', pad_inches=0)
 
     # Compute the objective function
     values_by_objective = objective_function.evaluate_function_by_objective(trajectory)
