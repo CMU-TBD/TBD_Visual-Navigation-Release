@@ -121,12 +121,11 @@ def test_custom_dubins_v1():
     v_1k = np.ones((k, 1)) * v0
     # Generate angular velocity controls
     w_1k = np.ones((k, 1)) * t0 # np.linspace(0.9, 1.1, k)[:, None]
-    print(w_1k)
     ctrl_1k2 = tf.constant(np.concatenate([v_1k, w_1k], axis=1)[None], dtype=tf.float32)
 
     trajectory = db.simulate_T(state_113, ctrl_1k2, T=k)
     state_1k3, _ = db.parse_trajectory(trajectory)
-
+    
     fig = plt.figure()
     ax = fig.add_subplot(111)
     xs, ys, ts = state_1k3[0, :, 0], state_1k3[0, :, 1], state_1k3[0, :, 2]

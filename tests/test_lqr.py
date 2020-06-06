@@ -36,7 +36,7 @@ def create_params():
 def test_lqr0(visualize=False):
     p = create_params()
     np.random.seed(seed=p.seed)
-    n, k = p.n, p.k
+    n, k = 1, p.k
     dt = p.dt
 
     db = DubinsV1(dt, params=p.system_dynamics_params.simulation_params)
@@ -52,11 +52,12 @@ def test_lqr0(visualize=False):
 
     x_nk3 = tf.constant(np.zeros((n, k, x_dim), dtype=np.float32))
     u_nk2 = tf.constant(np.zeros((n, k, u_dim), dtype=np.float32))
+    # Initiate a blank trajectory (all 0's)
     trajectory = db.assemble_trajectory(x_nk3, u_nk2)
 
     lqr_solver = LQRSolver(T=k-1, dynamics=db, cost=cost_fn)
     cost = lqr_solver.evaluate_trajectory_cost(trajectory)
-    expected_cost = .5*goal_x**2*k
+    expected_cost = .5*goal_x**2*k + .5*goal_y**2*k 
     assert((cost.numpy() == expected_cost).all())
 
     start_config = db.init_egocentric_robot_config(dt=dt, n=n)
