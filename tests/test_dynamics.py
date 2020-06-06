@@ -105,6 +105,35 @@ def test_dubins_v1(visualize=False):
     else:
         print('rerun with visualize=True to visualize the test')
 
+def test_custom_dubins_v1():
+    # Visualize One Trajectory for Debugging
+    dt = .1
+    n, k = 5, 50
+    x_dim, u_dim = 3, 2
+    # Generate Dubin's Model
+    db = DubinsV1(dt, create_system_dynamics_params())
+
+    # Generate Start State (x0, y0, t0)
+    state_113 = tf.constant([[[0, 0, 0]]], dtype=tf.float32)
+    # Generate linear velocity controls
+    v0 = 0.8
+    t0 = 0.5
+    v_1k = np.ones((k, 1)) * v0
+    # Generate angular velocity controls
+    w_1k = np.ones((k, 1)) * t0 # np.linspace(0.9, 1.1, k)[:, None]
+    print(w_1k)
+    ctrl_1k2 = tf.constant(np.concatenate([v_1k, w_1k], axis=1)[None], dtype=tf.float32)
+
+    trajectory = db.simulate_T(state_113, ctrl_1k2, T=k)
+    state_1k3, _ = db.parse_trajectory(trajectory)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    xs, ys, ts = state_1k3[0, :, 0], state_1k3[0, :, 1], state_1k3[0, :, 2]
+    ax.plot(xs, ys, 'r--')
+    ax.quiver(xs, ys, np.cos(ts), np.sin(ts))
+    # plt.show()
+    fig.savefig("./tests/dynamics/custom_dubins.png", bbox_inches='tight', pad_inches=0)
 
 def test_dubins_v2(visualize=False):
     np.random.seed(seed=1)
@@ -226,5 +255,6 @@ def test_dubins_v3():
 
 if __name__ == '__main__':
     test_dubins_v1(visualize=True)
+    test_custom_dubins_v1()
     test_dubins_v2(visualize=True)
     test_dubins_v3()

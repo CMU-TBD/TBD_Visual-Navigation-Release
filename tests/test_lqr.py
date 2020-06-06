@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-#tf.enable_eager_execution()
+tf.enable_eager_execution()
 import matplotlib.pyplot as plt
 from costs.quad_cost_with_wrapping import QuadraticRegulatorRef
 from optCtrl.lqr import LQRSolver
@@ -8,7 +8,7 @@ from systems.dubins_v1 import DubinsV1
 from dotmap import DotMap
 
 
-def create_params_2():
+def create_params():
     p = DotMap()
     p.seed = 1
     p.n = 5
@@ -75,7 +75,7 @@ def test_lqr0(visualize=False):
         ax.plot(pos_opt[:, 0], pos_opt[:, 1], 'b--', label='opt')
         ax.legend()
         # plt.show()
-        fig.savefig('./tests/lqr/test_lqr1.png', bbox_inches='tight', pad_inches=0)
+        fig.savefig('./tests/lqr/test_lqr0.png', bbox_inches='tight', pad_inches=0)
     else:
         print('rerun test_lqr0 with visualize=True to visualize the test')
 
@@ -128,7 +128,7 @@ def test_lqr1(visualize=False):
         ax.legend()
 
         # plt.show()
-        fig.savefig('./tests/lqr/test_lqr2.png', bbox_inches='tight', pad_inches=0)
+        fig.savefig('./tests/lqr/test_lqr1.png', bbox_inches='tight', pad_inches=0)
     else:
         print('rerun test_lqr1 with visualize=True to visualize the test')
 
@@ -207,7 +207,7 @@ def test_lqr2(visualize=False):
         ax.legend()
 
         # plt.show()
-        fig.savefig('./tests/lqr/test_lqr3.png', bbox_inches='tight', pad_inches=0)
+        fig.savefig('./tests/lqr/test_lqr2.png', bbox_inches='tight', pad_inches=0)
 
     else:
         print('rerun test_lqr2 with visualize=True to visualize the test')
