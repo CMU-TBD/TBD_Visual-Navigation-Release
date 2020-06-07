@@ -85,7 +85,7 @@ def test_cost_function(plot=False):
     map_size_2 = obstacle_occupancy_grid.shape[::-1]
 
     # Define a goal position and compute the corresponding fmm map
-    goal_pos_n2 = np.array([[20., 16.5], [8., 16.5]])
+    goal_pos_n2 = np.array([[20., 16.5]])
     fmm_map = FmmMap.create_fmm_map_based_on_goal_position(goal_positions_n2=goal_pos_n2,
                                                            map_size_2=map_size_2,
                                                            dx=0.05,

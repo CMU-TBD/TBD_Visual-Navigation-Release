@@ -140,7 +140,6 @@ def test_dubins_v2(visualize=False):
     x_dim, u_dim = 3, 2
     n, k = 17, 12
     ctrl = 1
-
     
     # Test that computation is occurring correctly
     db = DubinsV2(dt, create_system_dynamics_params())
