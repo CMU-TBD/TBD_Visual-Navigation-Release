@@ -12,6 +12,10 @@ class ObstacleMap(object):
         return p
 
     def dist_to_nearest_obs(self, pos_nk2):
+        """
+        Computes the distance to the nearest obstacle in
+        the obstacle mask map. 
+        """
         raise NotImplementedError
 
     def create_occupancy_grid_for_map(self, xs_nn, ys_nn):
@@ -26,7 +30,8 @@ class ObstacleMap(object):
     def create_occupancy_grid(pos_n3, **kwargs):
         """
         Create egocentric occupancy grids at the positions
-        in pos_n3.
+        in pos_n3, can have several implemtations, thus is left
+        up to the inheriting classes to implement
         """
         raise NotImplementedError
 
@@ -34,6 +39,8 @@ class ObstacleMap(object):
         """
         Convert pos_2 in real world coordinates
         to a point on the map.
+        Note: p.dx only exists in the inherited classes that 
+        add more parameters to p
         """
         map_pos_2 = pos_2/self.p.dx - self.p.map_origin_2
         if cast_to_int:
@@ -44,6 +51,8 @@ class ObstacleMap(object):
         """
         Convert pos_2 in map coordinates
         to a real world coordinate.
+        Note: p.dx only exists in the inherited classes that 
+        add more parameters to p
         """
         world_pos_2 = (pos_2 + self.p.map_origin_2)*self.p.dx
         return world_pos_2.astype(dtype)
