@@ -98,16 +98,21 @@ def test_avoid_obstacle(visualize=False):
     assert np.allclose(objective_values_13.numpy()[0], [0., 0., 0.54201907], atol=1e-4)
     if(visualize):
         fig = plt.figure()
-        ax = fig.add_subplot(1,2,1)
+        ax = fig.add_subplot(1,3,1)
         obstacle_map.render(ax)
         ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
         # ax.plot(objective[0, 0], objective[0, 1], 'k*')
         ax.set_title('obstacle map')
 
         # Plotting the "distance map"
-        ax = fig.add_subplot(1,2,2)
+        ax = fig.add_subplot(1,3,2)
         ax.imshow(distance_map, origin='lower')
         ax.set_title('distance map')
+
+        # Plotting the trajectory
+        ax = fig.add_subplot(1,3,3)
+        trajectory.render(ax)
+        ax.set_title('trajectory')
 
         fig.savefig('./tests/obstacles/test_obstacle_objective.png', bbox_inches='tight', pad_inches=0)
 

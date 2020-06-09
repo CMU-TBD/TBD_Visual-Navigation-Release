@@ -101,9 +101,20 @@ def test_dubins_v1(visualize=False):
         ax.quiver(xs, ys, np.cos(ts), np.sin(ts))
         # plt.show()
         fig.savefig("./tests/dynamics/test_dynamics1.png", bbox_inches='tight', pad_inches=0)
-
     else:
         print('rerun with visualize=True to visualize the test')
+
+def rand_array(from_range, size, decimals = 3):
+    """
+    Return a size='size' array with values in between 'from_range'
+    with 'decimals' decimal places
+    """
+    np.random.seed(seed=2)
+    return np.random.randint(
+            from_range[0]*(10**decimals), 
+            from_range[1]*(10**decimals), 
+            size=size)/(10.**decimals
+        )
 
 def test_custom_dubins_v1():
     # Visualize One Trajectory for Debugging
@@ -119,8 +130,13 @@ def test_custom_dubins_v1():
     v0 = 0.8
     t0 = 0.5
     v_1k = np.ones((k, 1)) * v0
+    # v_1k = rand_array(from_range=(0, 10), size=(k,1))
     # Generate angular velocity controls
-    w_1k = np.ones((k, 1)) * t0 # np.linspace(0.9, 1.1, k)[:, None]
+    # Randomly generate directions to control
+    # w_1k = rand_array(from_range=(-10, 10), size=(k,1))
+    w_1k = np.linspace(1, 10, k)[:, None]
+    print(w_1k)
+    # w_1k = np.ones((k, 1)) * t0 # np.linspace(0.9, 1.1, k)[:, None]
     ctrl_1k2 = tf.constant(np.concatenate([v_1k, w_1k], axis=1)[None], dtype=tf.float32)
 
     trajectory = db.simulate_T(state_113, ctrl_1k2, T=k)

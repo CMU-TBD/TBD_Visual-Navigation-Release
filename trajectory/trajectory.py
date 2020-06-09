@@ -389,7 +389,7 @@ class Trajectory(object):
 
     def render(self, axs, batch_idx=0, freq=4, plot_quiver=True, plot_heading=False,
                plot_velocity=False, label_start_and_end=False, name=''):
-        ax = axs[0][0]
+        ax = axs#[0][0]
         xs = self._position_nk2[batch_idx, :, 0]
         ys = self._position_nk2[batch_idx, :, 1]
         thetas = self._heading_nk1[batch_idx]
@@ -405,24 +405,65 @@ class Trajectory(object):
             title_str += ('\nStart: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]\n'.format(*start_5) +
                           'End: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]'.format(*end_5))
         ax.set_title(title_str)
-        i = 1
+
+        #TODO: fix the ax[i] indexing since the AxesSubplot is does not support indexing
         if plot_heading:
             print('\033[33m', "Plotting Heading", '\033[0m')
-            ax = axs[i][0]
+            ax = axs[1]#[0]
             ax.plot(np.r_[:self.k]*self.dt, self._heading_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Theta')
-            i += 1
 
 
         if plot_velocity:
             print('\033[33m', "Plotting Velocity", '\033[0m')
             time = np.r_[:self.k]*self.dt
 
-            ax = axs[i][0]
+            ax = axs[2]#[0]
             ax.plot(time, self._speed_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Linear Velocity')
 
-            ax = axs[i+1][0]
+            ax = axs[3]#[0]
+            ax.plot(time, self._angular_speed_nk1[batch_idx, :, 0].numpy(), 'r-')
+            ax.set_title('Angular Velocity')
+
+    def render_multi(self, axs, batch_idx=0, freq=4, plot_quiver=True, plot_heading=False,
+                plot_velocity=False, label_start_and_end=False, name=''):
+        """
+        Same as trajectory.render but with support for multi AxesSubplot axes, 
+        which are indexable, unlike normal trajectory renders. 
+        """
+        ax = axs[0][0]
+        xs = self._position_nk2[batch_idx, :, 0]
+        ys = self._position_nk2[batch_idx, :, 1]
+        thetas = self._heading_nk1[batch_idx]
+        ax.plot(xs, ys, 'r-')
+        
+        if plot_quiver:
+            ax.quiver(xs[::freq], ys[::freq], tf.cos(thetas[::freq]), tf.sin(thetas[::freq]))
+        print('\033[33m', "Rendering Multi-Trajectory", '\033[0m')
+        title_str = '{:s} Trajectory'.format(name)
+        if label_start_and_end:
+            start_5 = self.position_heading_speed_and_angular_speed_nk5()[batch_idx, 0]
+            end_5 = self.position_heading_speed_and_angular_speed_nk5()[batch_idx, -1]
+            title_str += ('\nStart: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]\n'.format(*start_5) +
+                            'End: [{:.3e}, {:.3e}, {:.3f}, {:.3f}, {:.3f}]'.format(*end_5))
+        ax.set_title(title_str)
+        if plot_heading:
+            print('\033[33m', "Plotting Heading", '\033[0m')
+            ax = axs[1][0]
+            ax.plot(np.r_[:self.k]*self.dt, self._heading_nk1[batch_idx, :, 0].numpy(), 'r-')
+            ax.set_title('Theta')
+
+
+        if plot_velocity:
+            print('\033[33m', "Plotting Velocity", '\033[0m')
+            time = np.r_[:self.k]*self.dt
+
+            ax = axs[2][0]
+            ax.plot(time, self._speed_nk1[batch_idx, :, 0].numpy(), 'r-')
+            ax.set_title('Linear Velocity')
+
+            ax = axs[3][0]
             ax.plot(time, self._angular_speed_nk1[batch_idx, :, 0].numpy(), 'r-')
             ax.set_title('Angular Velocity')
 
