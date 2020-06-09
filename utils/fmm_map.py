@@ -29,6 +29,7 @@ class FmmMap(object):
         self.map_origin_2 = map_origin_2
         self.dx = dx
 
+        #generate blank distance/angle voxel (3d pixel) maps
         self.fmm_distance_map = VoxelMap(scale=dx,
                                          origin_2=map_origin_2,
                                          map_size_2=tf.constant([n, m], dtype=tf.float32),
@@ -45,6 +46,7 @@ class FmmMap(object):
 
         """
         # Mask the goal array
+        # If the mask grid was given, mask the goal grid to flip the 1's and 0's
         if self.mask_grid_mn is not None:
             phi = np.ma.MaskedArray(self.goal_grid_mn, self.mask_grid_mn)
         else:
@@ -86,9 +88,12 @@ class FmmMap(object):
         ax.set_title('Fmm Angle')
 
     @staticmethod
-    def _create_fmm_map_goal_array_mn(goal_positions_n2, map_size_2, dx=1,
-                                      map_origin_2=tf.zeros([2], dtype=tf.float32),
-                                      mask_grid_mn=None):
+    def _create_fmm_map_goal_array_mn(goal_positions_n2, map_size_2, dx=1, map_origin_2=tf.zeros([2], dtype=tf.float32), mask_grid_mn=None):
+        """
+        Create a new **goal array** where the goals are marked as -1 as
+        given by goal_positions_n2 and map_origin_2, with dx. 
+        mask_grid_mn is kept although unused. 
+        """
         goal_array_mn = np.ones((map_size_2[1], map_size_2[0]))
         goal_index_x = np.floor((goal_positions_n2[:, 0] / dx) - map_origin_2[0]).astype(np.int32)
         goal_index_y = np.floor((goal_positions_n2[:, 1] / dx) - map_origin_2[1]).astype(np.int32)
@@ -96,11 +101,9 @@ class FmmMap(object):
         return goal_array_mn
 
     @classmethod
-    def create_fmm_map_based_on_goal_position(cls, goal_positions_n2, map_size_2, dx=1,
-                                              map_origin_2=tf.zeros([2], dtype=tf.float32),
-                                              mask_grid_mn=None):
+    def create_fmm_map_based_on_goal_position(cls, goal_positions_n2, map_size_2, dx=1, map_origin_2=tf.zeros([2], dtype=tf.float32), mask_grid_mn=None):
         """
-        Create a fmm map based on a given goal position.
+        Create a new fmm map instance based on a given goal position.
         """
         goal_array_mn = FmmMap._create_fmm_map_goal_array_mn(goal_positions_n2,
                                                              map_size_2, dx,
