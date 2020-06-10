@@ -133,7 +133,7 @@ class SBPDMap(ObstacleMap):
 
         self._render_margin(ax, margin=margin0, alpha=.5)
         self._render_margin(ax, margin=margin1, alpha=.35)
-
+        
         if start_config is not None:
             start_2 = start_config.position_nk2()[0, 0].numpy()
             delta = p.plotting_grid_steps * p.dx

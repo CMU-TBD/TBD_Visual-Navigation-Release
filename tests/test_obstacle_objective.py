@@ -10,6 +10,7 @@ from dotmap import DotMap
 
 
 def create_params():
+    # DotMap is essentially a fancy dictionary
     p = DotMap()
     # Obstacle avoidance parameters
     p.avoid_obstacle_objective = DotMap(obstacle_margin0=0.3,
@@ -26,10 +27,13 @@ def create_params():
 
 
 def create_renderer_params():
+    """
+    Used to generate the parameters for the environment, building and traversibles
+    """
     from params.renderer_params import get_traversible_dir, get_sbpd_data_dir
     p = DotMap()
-    p.dataset_name = 'sbpd'
-    p.building_name = 'area3'
+    p.dataset_name = 'sbpd'   # Stanford Building Parser Dataset (SBPD)
+    p.building_name = 'area3' # Name of the building (change to whatever is downloaded on your system)
     p.flip = False
 
     p.camera_params = DotMap(modalities=['occupancy_grid'],  # occupancy_grid, rgb, or depth
@@ -60,6 +64,10 @@ def create_renderer_params():
 
 
 def test_avoid_obstacle(visualize=False):
+    """
+    Run a test on handpicked waypoint values that build a trajectory and are used
+    to evaluate the computed distance_map and angle_map from the fmm_*_map.voxel_function_mn
+    """
     # Create parameters
     p = create_params()
 
@@ -80,6 +88,8 @@ def test_avoid_obstacle(visualize=False):
 
     # Expected objective values
     distance_map = obstacle_map.fmm_map.fmm_distance_map.voxel_function_mn
+    angle_map = obstacle_map.fmm_map.fmm_angle_map.voxel_function_mn
+
     idxs_xy_n2 = pos_nk2[0]/.05
     idxs_yx_n2 = idxs_xy_n2[:, ::-1].numpy().astype(np.int32)
     expected_min_dist_to_obs = np.array([distance_map[idxs_yx_n2[0][0], idxs_yx_n2[0][1]],
@@ -97,6 +107,10 @@ def test_avoid_obstacle(visualize=False):
     assert np.allclose(objective_values_13.numpy()[0], expected_objective, atol=1e-4)
     assert np.allclose(objective_values_13.numpy()[0], [0., 0., 0.54201907], atol=1e-4)
     if(visualize):
+        """
+        create a 1 x 3 (or 1 x 4) image of the obstacle map itself (as a traversible plot), 
+        next to its corresponding angle_map, and distance_map. Optionally plotting the trajectory
+        """
         fig = plt.figure()
         ax = fig.add_subplot(1,3,1)
         obstacle_map.render(ax)
@@ -104,19 +118,22 @@ def test_avoid_obstacle(visualize=False):
         # ax.plot(objective[0, 0], objective[0, 1], 'k*')
         ax.set_title('obstacle map')
 
-        # Plotting the "distance map"
+        # Plotting the "angle map"
         ax = fig.add_subplot(1,3,2)
+        ax.imshow(angle_map, origin='lower')
+        ax.set_title('angle map')
+
+        # Plotting the "distance map"
+        ax = fig.add_subplot(1,3,3)
         ax.imshow(distance_map, origin='lower')
         ax.set_title('distance map')
 
         # Plotting the trajectory
-        ax = fig.add_subplot(1,3,3)
-        trajectory.render(ax)
-        ax.set_title('trajectory')
+        #ax = fig.add_subplot(1,4,4)
+        #trajectory.render(ax)
+        #ax.set_title('trajectory')
 
         fig.savefig('./tests/obstacles/test_obstacle_objective.png', bbox_inches='tight', pad_inches=0)
-
-
 
 if __name__ == '__main__':
     test_avoid_obstacle(True)
