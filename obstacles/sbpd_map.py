@@ -35,7 +35,7 @@ class SBPDMap(ObstacleMap):
 
         free_xy = np.array(np.where(traversible)).T
         self.free_xy_map_m2 = free_xy[:, ::-1]
-
+        #Swap the traversible to have 1's where the building is traversable
         self.occupancy_grid_map = np.logical_not(traversible)*1.
 
     def _initialize_fmm_map(self):
@@ -45,6 +45,7 @@ class SBPDMap(ObstacleMap):
         """
         p = self.p
         occupied_xy_m2 = np.array(np.where(self.occupancy_grid_map)).T
+        # Reverse the shape as indexing into the traverible is reversed ([y, x] indexing)
         occupied_xy_m2 = occupied_xy_m2[:, ::-1]
         occupied_xy_m2_world = self._map_to_point(occupied_xy_m2)
         self.fmm_map = FmmMap.create_fmm_map_based_on_goal_position(
@@ -55,6 +56,10 @@ class SBPDMap(ObstacleMap):
                                 mask_grid_mn=None)
 
     def dist_to_nearest_obs(self, pos_nk2):
+        """
+        Utilize the FMM Map's ability to compute nearest distances
+        from a given position to return just that. 
+        """
         with tf.name_scope('dist_to_obs'):
             distance_nk = self.fmm_map.fmm_distance_map.compute_voxel_function(pos_nk2)
             return distance_nk
@@ -112,6 +117,11 @@ class SBPDMap(ObstacleMap):
         return imgs
 
     def render(self, ax, start_config=None):
+        """
+        Output a top-down grid view of the occupancy-grid-map
+        Note: the map sohuld have 1's where the building is traversable
+        and 1's where there are obstacles. 
+        """
         p = self.p
         ax.imshow(self.occupancy_grid_map, cmap='gray_r',
                   extent=np.array(self.map_bounds).flatten(order='F'),
@@ -124,6 +134,10 @@ class SBPDMap(ObstacleMap):
             ax.set_ylim(start_2[1]-delta, start_2[1]+delta)
 
     def render_with_obstacle_margins(self, ax, start_config=None, margin0=.3, margin1=.5):
+        """
+        Utilize the input margins to render around the occupancy mask to highlight
+        the intensity of the obstacle avoidance cost function
+        """
         p = self.p
         occupancy_grid_masked = np.ma.masked_where(self.occupancy_grid_map == 0,
                                                    self.occupancy_grid_map)
