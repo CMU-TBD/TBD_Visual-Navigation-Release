@@ -12,10 +12,13 @@ import matplotlib
 
 class Simulator(SimulatorHelper):
 
-    def __init__(self, params):
+    def __init__(self, params, obstacle_map = None):
         self.params = params.simulator.parse_params(params)
         self.rng = np.random.RandomState(params.seed)
-        self.obstacle_map = self._init_obstacle_map(self.rng)
+        if obstacle_map is None:
+            self.obstacle_map = self._init_obstacle_map(self.rng)
+        else: # When given a specific obstacle map to use
+            self.obstacle_map = obstacle_map
         self.obj_fn = self._init_obj_fn()
         self.planner = self._init_planner()
         self.system_dynamics = self._init_system_dynamics()

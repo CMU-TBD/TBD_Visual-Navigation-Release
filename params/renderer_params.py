@@ -5,7 +5,7 @@ from params.base_data_directory import base_data_dir
 def create_params():
     p = DotMap()
     p.dataset_name = 'sbpd'
-    p.building_name = 'area1'
+    p.building_name = 'area3'
     p.flip = False
 
     p.load_meshes = True

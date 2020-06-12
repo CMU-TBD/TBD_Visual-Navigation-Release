@@ -128,7 +128,7 @@ def test_piecewise_spline():
 
     fig = plt.figure()
     fig, ax = plt.subplots(4,1, figsize=(5,15), squeeze=False)
-    final_spline.render(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
+    final_spline.render_multi(ax, freq=4, plot_heading=True, plot_velocity=True, label_start_and_end=True)
     # trajectory.render(ax, freq=1, plot_heading=True, plot_velocity=True, label_start_and_end=True)
     fig.savefig('./tests/spline/test_piecewise_spline.png', bbox_inches='tight', pad_inches=0)
 
