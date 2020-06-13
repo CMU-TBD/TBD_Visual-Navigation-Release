@@ -10,3 +10,6 @@
 /logs
 *.DS_Store
 /.idea
+/pretrained_data
+.vscode
+/params/base_data_directory.py
