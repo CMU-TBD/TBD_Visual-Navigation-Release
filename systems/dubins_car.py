@@ -2,6 +2,7 @@ from systems.dynamics import Dynamics
 from trajectory.trajectory import Trajectory, SystemConfig
 from utils.angle_utils import angle_normalize, rotate_pos_nk2, padded_rotation_matrix
 import tensorflow as tf
+import numpy as np
 
 
 class DubinsCar(Dynamics):
@@ -166,8 +167,16 @@ class DubinsCar(Dynamics):
     @staticmethod
     def convert_position_and_heading_to_world_coordinates(ref_position_and_heading_n13,
                                                           ego_position_and_heading_nk3):
-        """ Converts a sequence of position and headings to the world frame."""
+        """ Converts a sequence of position and headings to the world frame.
+        the ref_position_and_heading_n13 is the base parameters for the world frame [0,0,0]
+        """
         position_nk2 = rotate_pos_nk2(ego_position_and_heading_nk3[:, :, :2], ref_position_and_heading_n13[:, :, 2:3])
-        position_nk2 = position_nk2 + ref_position_and_heading_n13[:, :, :2]
-        heading_nk1 = angle_normalize(ego_position_and_heading_nk3[:, :, 2:3] + ref_position_and_heading_n13[:, :, 2:3])
+        ref_position_n12 = ref_position_and_heading_n13[:, :, :2] # x and y coordinates
+        ref_position_0 = ref_position_n12[0]
+        ref_position_nk2 = np.broadcast_to(ref_position_0, ego_position_and_heading_nk3[:, :, :2].shape)
+        ref_heading_n11 = ref_position_and_heading_n13[:, :, 2:3]
+        ref_heading_0 = ref_heading_n11[0]
+        ref_heading_nk1 = np.broadcast_to(ref_heading_0, ego_position_and_heading_nk3[:, :, 2:3].shape)
+        position_nk2 = position_nk2 + ref_position_nk2
+        heading_nk1 = angle_normalize(ego_position_and_heading_nk3[:, :, 2:3] + ref_heading_nk1)
         return tf.concat([position_nk2, heading_nk1], axis=2)

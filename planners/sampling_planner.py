@@ -53,7 +53,7 @@ class SamplingPlanner(Planner):
             K_nkfd = controllers['K_nkfd'][min_idx:min_idx + 1]
             k_nkf1 = controllers['k_nkf1'][min_idx:min_idx + 1]
 
-        img_nmkd = self.simulator.get_observation(config=start_config)
+        # img_nmkd = self.simulator.get_observation(config=start_config)
 
         data = {'system_config': SystemConfig.copy(start_config),
                 'waypoint_config': SystemConfig.copy(self.opt_waypt),
@@ -61,7 +61,7 @@ class SamplingPlanner(Planner):
                 'spline_trajectory': Trajectory.copy(trajectories_spline),
                 'planning_horizon': min_horizon,
                 'K_nkfd': K_nkfd,
-                'k_nkf1': k_nkf1,
-                'img_nmkd': img_nmkd}
+                'k_nkf1': k_nkf1}
+                # 'img_nmkd': img_nmkd} # Dont need for our purposes
 
         return data

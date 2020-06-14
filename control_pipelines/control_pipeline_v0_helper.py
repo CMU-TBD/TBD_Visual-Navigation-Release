@@ -14,9 +14,10 @@ class ControlPipelineV0Helper():
         """" Given desired_waypoint_config and a list of precomputed waypoints in waypt_configs returns the index of
         the closest (in wrapped l2 distance) precomputed waypoint."""
         # TODO: Potentially add linear and angular velocity here
-        diff_pos_nk2 = desired_waypt_config.position_nk2() - waypt_configs.position_nk2()
-        diff_heading_nk1 = angle_normalize(desired_waypt_config.heading_nk1().numpy() -
-                                           waypt_configs.heading_nk1().numpy())
+        broadcasted_goal = np.ones(shape=waypt_configs.position_nk2().shape, dtype=np.float32) * desired_waypt_config.position_nk2()[0]
+        diff_pos_nk2 = broadcasted_goal - waypt_configs.position_nk2()
+        broadcasted_goal_angle = np.ones(shape=waypt_configs.heading_nk1().shape, dtype=np.float32) * desired_waypt_config.heading_nk1()[0]
+        diff_heading_nk1 = angle_normalize(broadcasted_goal_angle - waypt_configs.heading_nk1().numpy())
         diff = tf.concat([diff_pos_nk2, diff_heading_nk1], axis=2)
         idx = tf.argmin(tf.norm(diff, axis=2))
         return idx.numpy()[0]

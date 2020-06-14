@@ -42,11 +42,11 @@ class ControlPipelineV0(ControlPipelineBase):
 
         # Compute the closest velocity bin for this starting configuration
         idx = tf.squeeze(self._compute_bin_idx_for_start_velocities(start_config.speed_nk1()[:, :, 0])).numpy()
-
+        #debug:
+        # idx = idx[0]
+        #end debug
         # Convert waypoints for this velocity bin into world coordinates
-        self.waypt_configs_world[idx] = self.system_dynamics.to_world_coordinates(start_config, self.waypt_configs[idx],
-                                                                                  self.waypt_configs_world[idx],
-                                                                                  mode='assign')
+        self.waypt_configs_world[idx] = self.system_dynamics.to_world_coordinates(start_config, self.waypt_configs[idx], self.waypt_configs_world[idx], mode='assign')
         # Setup world coordinate tensors if needed
         self._ensure_world_coordinate_tensors_exist(goal_config)
 
@@ -83,9 +83,9 @@ class ControlPipelineV0(ControlPipelineBase):
 
     def _plan_to_a_waypoint(self, idx, start_config, goal_config):
         """
-        Find the closest waypoint to the goal_config and return the associated waypoint, spline horizon, trajectory,
-        and lqr controllers.
+        Find the closest waypoint to the goal_config and return the associated waypoint, spline horizon, trajectory, and lqr controllers.
         """
+        # idx = idx[0] already taken care of in 'plan'
         waypt_idx = self.helper.compute_closest_waypt_idx(goal_config, self.waypt_configs_world[idx])
         waypt_configs = self.waypt_configs_world[idx][waypt_idx]
         horizons = self.horizons[idx][waypt_idx:waypt_idx+1]
@@ -118,7 +118,7 @@ class ControlPipelineV0(ControlPipelineBase):
         pipeline_data = self.helper.empty_data_dictionary()
 
         with tf.name_scope('generate_control_pipeline'):
-            if not self._incorrectly_binned_data_exists():
+            if self._incorrectly_binned_data_exists():
                 for v0 in self.start_velocities:
                     if p.verbose:
                         print('Initial Bin: v0={:.3f}'.format(v0))

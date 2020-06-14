@@ -26,8 +26,7 @@ class ObjectiveFunction(object):
         Evaluate each objective corresponding to a system trajectory.
 
         """
-        objective_values_by_tag = [[objective.tag, objective.evaluate_objective(trajectory)]
-                                   for objective in self.objectives]
+        objective_values_by_tag = [[objective.tag, objective.evaluate_objective(trajectory)] for objective in self.objectives]
         return objective_values_by_tag
 
     def evaluate_function(self, trajectory):

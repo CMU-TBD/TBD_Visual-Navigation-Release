@@ -13,7 +13,10 @@ def rotate_pos_nk2(pos_nk2, theta_n11):
     does not vary over time (hence theta_n11 not theta_nk1)."""
     # Broadcast theta_n11 to size nk1. broadcast_to does not track gradients so addition is used
     # here instead
-    theta_nk1 = theta_n11 + 0. * pos_nk2[:, :, 0:1]
+    #theta_nk1 = theta_n11 + 0. * pos_nk2[:, :, 0:1]
+    t_0 = theta_n11[0][0] # since theta_n11 is nx1x1 matrix
+    theta_nk1 = np.ones_like(pos_nk2)*t_0 #(element wise vector multiplication)
+    #theta_nk1 = theta_n11 + 0. * pos_nk2[:, :, 0:1]
     if type(theta_nk1) is np.ndarray:
         n, k, _ = [x for x in theta_nk1.shape]
     else:
@@ -34,7 +37,9 @@ def padded_rotation_matrix(theta_n11, shape, lower_identity=False):
     e = d-2
     assert(d >= 2)
     dtype = theta_n11.dtype
-    theta_nk11 = tf.broadcast_to(theta_n11[:, None], (n, k, 1, 1))
+    t_0 = theta_n11[0][0]
+    # theta_nk11 = tf.broadcast_to(theta_n11[:, None], (n, k, 1, 1))
+    theta_nk11 = np.ones(shape=(n,k,1,1), dtype=dtype)*t_0 #(element wise vector multiplication)
 
     first_row_nkd1 = tf.concat([tf.cos(theta_nk11),
                                tf.sin(theta_nk11),

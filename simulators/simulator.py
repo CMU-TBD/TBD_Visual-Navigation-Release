@@ -410,11 +410,11 @@ class Simulator(SimulatorHelper):
         if not p.goal_distance_objective.empty():
             obj_fn.add_objective(GoalDistance(
                 params=p.goal_distance_objective,
-                fmm_map=None))
+                fmm_map=self.obstacle_map.fmm_map))
         if not p.goal_angle_objective.empty():
             obj_fn.add_objective(AngleDistance(
                 params=p.goal_angle_objective,
-                fmm_map=None))
+                fmm_map=self.obstacle_map.fmm_map))
         return obj_fn
 
     def _init_fmm_map(self, goal_pos_n2=None):

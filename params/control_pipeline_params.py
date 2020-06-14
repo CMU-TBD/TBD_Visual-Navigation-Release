@@ -35,7 +35,7 @@ def create_params():
                           linear_coeffs=np.zeros((5), dtype=np.float32))
 
     # Velocity binning parameters
-    p.binning_parameters = DotMap(num_bins=61,
+    p.binning_parameters = DotMap(num_bins=5,
                                   min_speed=p.system_dynamics_params.v_bounds[0],
                                   max_speed=p.system_dynamics_params.v_bounds[1])
 
@@ -55,5 +55,5 @@ def create_params():
     # linear and angular acceleration. If not set to false to save memory
     p.track_trajectory_acceleration = True
 
-    p.verbose = False
+    p.verbose = True
     return p
