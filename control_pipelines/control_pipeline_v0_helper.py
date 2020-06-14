@@ -2,6 +2,7 @@ import pickle
 from trajectory.trajectory import Trajectory, SystemConfig
 import tensorflow as tf
 import numpy as np
+import os
 from utils.angle_utils import angle_normalize
 
 
@@ -49,6 +50,8 @@ class ControlPipelineV0Helper():
                               discard_precomputed_lqr_trajectories=False,
                               track_trajectory_acceleration=False):
         """Load control pipeline data from a pickle file and process it so that it can be used by the pipeline."""
+        if(not os.path.exists(filename)):
+            os.mknod(filename) #create the 'incorrectly_binned.pkl' if not there
         with open(filename, 'rb') as f:
             data = pickle.load(f)
 
