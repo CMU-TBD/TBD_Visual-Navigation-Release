@@ -186,6 +186,22 @@ class Simulator(SimulatorHelper):
 
         return end_episode, episode_data
 
+    def reset_with_start_and_goal(self, start_config, goal_config):
+        """Reset the simulator. Given the start and 
+        end states."""
+        
+        # Note: Obstacle map must be reset independently of the fmm map.
+        # Sampling start and goal may depend on the updated state of the
+        # obstacle map. Updating the fmm map depends on the newly sampled goal.        
+        self._reset_obstacle_map(self.rng)
+        self.start_config = start_config
+        self.goal_config = goal_config
+        self._update_fmm_map()
+
+        self.vehicle_trajectory = Trajectory(dt=self.params.dt, n=1, k=0)
+        self.obj_val = np.inf
+        self.vehicle_data = {}
+
     def reset(self, seed=-1):
         """Reset the simulator. Optionally takes a seed to reset
         the simulator's random state."""
@@ -555,7 +571,7 @@ class Simulator(SimulatorHelper):
             self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=False)
             self._render_waypoints(ax)
         else:
-            self.vehicle_trajectory.render([ax], freq=freq, plot_quiver=True)
+            self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=True)
 
         boundary_params = {'norm': p.goal_dist_norm, 'cutoff':
                            p.goal_cutoff_dist, 'color': 'g'}

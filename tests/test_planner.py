@@ -94,7 +94,7 @@ def test_planner():
     k = 10
  
     # Goal states and initial speeds
-    goal_pos_n11 = tf.constant([[[8., 16.5]]]) # Goal position (must be 1x1x2 array)
+    goal_pos_n11 = tf.constant([[[18., 16.5]]]) # Goal position (must be 1x1x2 array)
     goal_heading_n11 = tf.constant([[[np.pi/2.]]])
     # Start states and initial speeds
     start_pos_n11 = tf.constant([[[8., 12.]]]) # Goal position (must be 1x1x2 array)
@@ -113,7 +113,9 @@ def test_planner():
                                heading_nk1=goal_heading_n11,
                                variable=True)
     #  waypts, horizons, trajectories_lqr, trajectories_spline, controllers = controller.plan(start_config, goal_config)
+    splanner.simulator.simulator.reset_with_start_and_goal(start_config, goal_config)
     splanner.eval_objective(start_config, goal_config)
+    splanner.simulator.simulator.simulate()
     splanner.optimize(start_config)
     #obj_val, [waypts, horizons, trajectories_lqr, trajectories_spline, controllers] = splanner.eval_objective(start_config, goal_config)
     opt_traj = splanner.opt_traj
@@ -127,11 +129,9 @@ def test_planner():
     # ax.plot(trajectory._position_nk2[0, :, 0],trajectory._position_nk2[0, :, 1], 'r-')
     # ax.plot(trajectories_spline._position_nk2[0, :, 0],trajectories_spline._position_nk2[0, :, 1], 'r-')
     # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
-    splanner.simulator.simulator.reset()
-    splanner.simulator.simulator.simulate()
     splanner.simulator.simulator.render(ax)
-    # ax.plot(objective[0, 0], objective[0, 1], 'k*')
-    ax.set_title('obstacle map')
+    #ax.plot(objective[0, 0], objective[0, 1], 'k*')
+    # ax.set_title('obstacle map')
     ax = fig.add_subplot(1,2,2)
     splanner.simulator.simulator._render_trajectory(ax)
 
