@@ -90,7 +90,7 @@ def test_planner():
 
     # Spline trajectory params
     n = 1
-    dt = .1
+    dt = 1
     k = 10
  
     # Goal states and initial speeds
@@ -119,22 +119,25 @@ def test_planner():
     splanner.optimize(start_config)
     #obj_val, [waypts, horizons, trajectories_lqr, trajectories_spline, controllers] = splanner.eval_objective(start_config, goal_config)
     opt_traj = splanner.opt_traj
+    trajectories_spline = opt_traj # for now... splanner.simulator.simulator.spline_trajectory
     # Expected objective values
     # distance_map = obstacle_map.fmm_map.fmm_distance_map.voxel_function_mn
     # Visualization
     fig = plt.figure()
-    ax = fig.add_subplot(1,2,1)
+    ax = fig.add_subplot(1,1,1)
     # obstacle_map.render(ax)
     # ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
     # ax.plot(trajectory._position_nk2[0, :, 0],trajectory._position_nk2[0, :, 1], 'r-')
-    # ax.plot(trajectories_spline._position_nk2[0, :, 0],trajectories_spline._position_nk2[0, :, 1], 'r-')
-    # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
     splanner.simulator.simulator.render(ax)
     #ax.plot(objective[0, 0], objective[0, 1], 'k*')
     # ax.set_title('obstacle map')
-    ax = fig.add_subplot(1,2,2)
-    splanner.simulator.simulator._render_trajectory(ax)
+    # ax = fig.add_subplot(1,3,2)
+    # ax.plot(trajectories_spline._position_nk2[0, :, 0],trajectories_spline._position_nk2[0, :, 1], 'r-')
+    # ax.set_title('traj_spline')
 
+    # ax = fig.add_subplot(1,3,3)
+    # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
+    # ax.set_title('opt_traj')
     # Plotting the "distance map"
     # ax = fig.add_subplot(1,2,2)
     # ax.imshow(distance_map, origin='lower')

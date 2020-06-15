@@ -12,8 +12,8 @@ def create_params():
     p.load_traversible_from_pickle_file = True
 
     p.camera_params = DotMap(modalities=['occupancy_grid'],  # occupancy_grid, rgb, or depth
-                             width=64,
-                             height=64,  # the remaining params are for rgb and depth only
+                             width=128,
+                             height=128,  # the remaining params are for rgb and depth only
                              z_near=.01,
                              z_far=20.0,
                              fov_horizontal=90.,

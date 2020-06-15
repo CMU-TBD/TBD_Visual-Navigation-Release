@@ -547,26 +547,26 @@ class Simulator(SimulatorHelper):
         """ By default the simulator does not support video capture."""
         return None
 
-    def render(self, axs, freq=4, render_velocities=False, prepend_title=''):
+    def render(self, axs, freq=4, render_waypoints=False, render_velocities=False, prepend_title=''):
         if type(axs) is list or type(axs) is np.ndarray:
-            self._render_trajectory(axs[0], freq)
+            self._render_trajectory(axs[0], freq, render_waypoints)
 
             if render_velocities:
                 self._render_velocities(axs[1], axs[2])
             [ax.set_title('{:s}{:s}'.format(prepend_title, ax.get_title())) for ax in axs]
         else:
-            self._render_trajectory(axs, freq)
+            self._render_trajectory(axs, freq, render_waypoints)
             axs.set_title('{:s}{:s}'.format(prepend_title, axs.get_title()))
 
     def _render_obstacle_map(self, ax):
         self.obstacle_map.render(ax)
 
-    def _render_trajectory(self, ax, freq=4):
+    def _render_trajectory(self, ax, freq=4, render_waypoints = False):
         p = self.params
 
         self._render_obstacle_map(ax)
 
-        if 'waypoint_config' in self.vehicle_data.keys():
+        if render_waypoints and 'waypoint_config' in self.vehicle_data.keys():
             # Dont want ax in a list 
             self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=False)
             self._render_waypoints(ax)

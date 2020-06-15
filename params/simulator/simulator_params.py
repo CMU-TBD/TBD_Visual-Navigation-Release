@@ -13,7 +13,7 @@ def create_params():
     p.seed = 10  # seed for the simulator (different than for numpy and tf)
 
     # Horizons in seconds
-    p.episode_horizon_s = 20.0
+    p.episode_horizon_s = 3000 # more time to simulate a feasable path
     p.control_horizon_s = 1.5
 
     # Whether to log videos taken during trajectories
