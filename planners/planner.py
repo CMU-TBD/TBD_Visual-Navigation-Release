@@ -120,7 +120,7 @@ class Planner(object):
         data['planning_horizon_n1'] = np.array(data['planning_horizon'])[valid_mask][:, None]
         data['K_nkfd'] = tf.boolean_mask(tf.concat(data['K_nkfd'], axis=0), valid_mask)
         data['k_nkf1'] = tf.boolean_mask(tf.concat(data['k_nkf1'], axis=0), valid_mask)
-        data['img_nmkd'] = np.array(np.concatenate(data['img_nmkd'], axis=0))[valid_mask]
+        # data['img_nmkd'] = np.array(np.concatenate(data['img_nmkd'], axis=0))[valid_mask] # Dont think we need for our purposes
         return data, data_last, last_data_valid
 
 

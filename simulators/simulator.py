@@ -207,10 +207,14 @@ class Simulator(SimulatorHelper):
         self.vehicle_data = {}
 
     def _reset_obstacle_map(self, rng):
-        raise NotImplementedError
+        # want to use the same map
+        dummy = 1
+        # raise NotImplementedError
 
     def _update_fmm_map(self):
-        raise NotImplementedError
+        # want to use the same map
+        dummy = 1
+        # raise NotImplementedError
 
     def _reset_start_configuration(self, rng):
         """
@@ -539,7 +543,7 @@ class Simulator(SimulatorHelper):
             axs.set_title('{:s}{:s}'.format(prepend_title, axs.get_title()))
 
     def _render_obstacle_map(self, ax):
-        raise NotImplementedError
+        self.obstacle_map.render(ax)
 
     def _render_trajectory(self, ax, freq=4):
         p = self.params
@@ -547,7 +551,8 @@ class Simulator(SimulatorHelper):
         self._render_obstacle_map(ax)
 
         if 'waypoint_config' in self.vehicle_data.keys():
-            self.vehicle_trajectory.render([ax], freq=freq, plot_quiver=False)
+            # Dont want ax in a list 
+            self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=False)
             self._render_waypoints(ax)
         else:
             self.vehicle_trajectory.render([ax], freq=freq, plot_quiver=True)

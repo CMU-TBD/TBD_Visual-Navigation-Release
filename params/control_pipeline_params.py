@@ -24,7 +24,7 @@ def create_params():
 
     # Spline parameters
     p.spline_params = DotMap(spline=Spline3rdOrder,
-                             max_final_time=60.0,
+                             max_final_time=20.0, #60 crashes pc with 32Gb ram, 6 is small trajectory
                              epsilon=1e-5)
     p.minimum_spline_horizon = 1.5
 
@@ -35,7 +35,7 @@ def create_params():
                           linear_coeffs=np.zeros((5), dtype=np.float32))
 
     # Velocity binning parameters
-    p.binning_parameters = DotMap(num_bins=15, # 61 crashes pc with 32gb ram
+    p.binning_parameters = DotMap(num_bins=5, # 61 crashes pc with 32gb ram, 15 is slow
                                   min_speed=p.system_dynamics_params.v_bounds[0],
                                   max_speed=p.system_dynamics_params.v_bounds[1])
 

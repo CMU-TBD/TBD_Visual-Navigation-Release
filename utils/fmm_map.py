@@ -47,7 +47,7 @@ class FmmMap(object):
         """
         # Mask the goal array
         # If the mask grid was given, mask the goal grid to flip the 1's and 0's
-        if self.mask_grid_mn is not None:
+        if False: #self.mask_grid_mn is not None: (goal_grid_mn seems to be the best here)
             phi = np.ma.MaskedArray(self.goal_grid_mn, self.mask_grid_mn)
         else:
             phi = self.goal_grid_mn
@@ -56,7 +56,7 @@ class FmmMap(object):
         fmm_distance = skfmm.distance(phi, dx=self.fmm_distance_map.map_scale*np.ones(2))
 
         # Assign some distance at the mask
-        if self.mask_grid_mn is not None:
+        if False: #self.mask_grid_mn is not None: # Dont think I want to do this
             fmm_distance = fmm_distance.filled(mask_value)
 
         # Compute the fmm angle

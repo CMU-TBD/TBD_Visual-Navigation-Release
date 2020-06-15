@@ -61,7 +61,7 @@ class SamplingPlanner(Planner):
                 'spline_trajectory': Trajectory.copy(trajectories_spline),
                 'planning_horizon': min_horizon,
                 'K_nkfd': K_nkfd,
-                'k_nkf1': k_nkf1}
-                # 'img_nmkd': img_nmkd} # Dont need for our purposes
+                'k_nkf1': k_nkf1,
+                'img_nmkd': []} # Dont think we need for our purposes
 
         return data

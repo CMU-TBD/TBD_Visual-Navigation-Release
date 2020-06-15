@@ -83,7 +83,6 @@ def test_planner():
     sim = Simulator(sim_params, obstacle_map)
     planner = Planner(sim, planner_params)
     splanner = SamplingPlanner(planner, planner_params)
-    splanner.parse_params(planner_params)
     # Define a set of positions and evaluate objective (shape = [1,k,2])
     # TRaversing via End, Waypts, Start
     pos_nk2 = tf.constant([[[18., 16.5], [10., 16.5], [8., 16.], [8., 12.5]]], dtype=tf.float32)
@@ -119,23 +118,27 @@ def test_planner():
     #obj_val, [waypts, horizons, trajectories_lqr, trajectories_spline, controllers] = splanner.eval_objective(start_config, goal_config)
     opt_traj = splanner.opt_traj
     # Expected objective values
-    distance_map = obstacle_map.fmm_map.fmm_distance_map.voxel_function_mn
+    # distance_map = obstacle_map.fmm_map.fmm_distance_map.voxel_function_mn
     # Visualization
     fig = plt.figure()
     ax = fig.add_subplot(1,2,1)
-    obstacle_map.render(ax)
-    ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
+    # obstacle_map.render(ax)
+    # ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
     # ax.plot(trajectory._position_nk2[0, :, 0],trajectory._position_nk2[0, :, 1], 'r-')
     # ax.plot(trajectories_spline._position_nk2[0, :, 0],trajectories_spline._position_nk2[0, :, 1], 'r-')
-    ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
+    # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
+    splanner.simulator.simulator.reset()
+    splanner.simulator.simulator.simulate()
+    splanner.simulator.simulator.render(ax)
     # ax.plot(objective[0, 0], objective[0, 1], 'k*')
     ax.set_title('obstacle map')
-
+    ax = fig.add_subplot(1,2,2)
+    splanner.simulator.simulator._render_trajectory(ax)
 
     # Plotting the "distance map"
-    ax = fig.add_subplot(1,2,2)
-    ax.imshow(distance_map, origin='lower')
-    ax.set_title('distance map')
+    # ax = fig.add_subplot(1,2,2)
+    # ax.imshow(distance_map, origin='lower')
+    # ax.set_title('distance map')
 
     fig.savefig('./tests/planner/test_planner.png', bbox_inches='tight', pad_inches=0)
 
