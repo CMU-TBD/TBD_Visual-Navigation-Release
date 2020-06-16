@@ -133,7 +133,7 @@ class SBPDMap(ObstacleMap):
             ax.set_xlim(start_2[0]-delta, start_2[0]+delta)
             ax.set_ylim(start_2[1]-delta, start_2[1]+delta)
 
-    def render_with_obstacle_margins(self, ax, start_config=None, margin0=.3, margin1=.5):
+    def render_with_obstacle_margins(self, ax, start_config=None, margin0=.3, margin1=.5, zoom=0):
         """
         Utilize the input margins to render around the occupancy mask to highlight
         the intensity of the obstacle avoidance cost function
@@ -149,10 +149,16 @@ class SBPDMap(ObstacleMap):
         self._render_margin(ax, margin=margin1, alpha=.35)
         
         if start_config is not None:
-            start_2 = start_config.position_nk2()[0, 0].numpy()
-            delta = p.plotting_grid_steps * p.dx
-            ax.set_xlim(start_2[0]-delta, start_2[0]+delta)
-            ax.set_ylim(start_2[1]-delta, start_2[1]+delta)
+            if(zoom is not 0):
+                # Render map around the start by a certain amount
+                start_2 = start_config.position_nk2()[0, 0].numpy()
+                delta = p.plotting_grid_steps * p.dx * 2
+                ax.set_xlim(start_2[0]-zoom, start_2[0]+zoom)
+                ax.set_ylim(start_2[1]-zoom, start_2[1]+zoom)
+            else:
+                # Render map fully
+                ax.set_xlim(self.map_bounds[0][0], self.map_bounds[1][0])
+                ax.set_ylim(self.map_bounds[0][0], self.map_bounds[1][1])
 
     def _render_margin(self, ax, margin, alpha):
         """

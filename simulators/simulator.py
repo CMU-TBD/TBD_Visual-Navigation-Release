@@ -555,7 +555,7 @@ class Simulator(SimulatorHelper):
         """ By default the simulator does not support video capture."""
         return None
 
-    def render(self, axs, freq=4, render_waypoints=False, render_velocities=False, prepend_title=''):
+    def render(self, axs, freq=4, render_waypoints=False, render_velocities=False, prepend_title='', zoom=0):
         if type(axs) is list or type(axs) is np.ndarray:
             self._render_trajectory(axs[0], freq, render_waypoints)
 
@@ -563,16 +563,16 @@ class Simulator(SimulatorHelper):
                 self._render_velocities(axs[1], axs[2])
             [ax.set_title('{:s}{:s}'.format(prepend_title, ax.get_title())) for ax in axs]
         else:
-            self._render_trajectory(axs, freq, render_waypoints)
+            self._render_trajectory(axs, freq, render_waypoints, zoom)
             axs.set_title('{:s}{:s}'.format(prepend_title, axs.get_title()))
 
     def _render_obstacle_map(self, ax):
         self.obstacle_map.render(ax)
 
-    def _render_trajectory(self, ax, freq=4, render_waypoints = False):
+    def _render_trajectory(self, ax, freq=4, render_waypoints = False, zoom=0):
         p = self.params
 
-        self._render_obstacle_map(ax)
+        self._render_obstacle_map(ax, zoom)
 
         if render_waypoints and 'waypoint_config' in self.vehicle_data.keys():
             # Dont want ax in a list 
@@ -591,11 +591,11 @@ class Simulator(SimulatorHelper):
         start = self.start_config.position_nk2()[0, 0]
         text_color = p.episode_termination_colors[self.episode_type]
         ax.set_title('Start: [{:.2f}, {:.2f}] '.format(*start) +
-                     'Goal: [{:.2f}, {:.2f}]'.format(*goal), color=text_color)
+                     '\n Goal: [{:.2f}, {:.2f}]'.format(*goal), color=text_color)
 
         final_pos = self.vehicle_trajectory.position_nk2()[0, -1]
         ax.set_xlabel('Cost: {cost:.3f} '.format(cost=self.obj_val) +
-                      'End: [{:.2f}, {:.2f}]'.format(*final_pos), color=text_color)
+                      '\n End: [{:.2f}, {:.2f}]'.format(*final_pos), color=text_color)
         final_x = final_pos.numpy()[0]
         final_y = final_pos.numpy()[1]
         ax.plot(final_x, final_y, text_color+'.')

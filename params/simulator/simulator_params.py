@@ -36,7 +36,7 @@ def create_params():
     # Goal Distance parameters
     p.goal_distance_objective = DotMap(power=2,
                                        goal_cost=.08,
-                                       goal_margin=0.5) #cutoff distance for the goal
+                                       goal_margin=0.3) #cutoff distance for the goal
 
     p.objective_fn_params = DotMap(obj_type='valid_mean')
     p.reset_params = DotMap(
