@@ -19,6 +19,10 @@ class ControlPipelineV0Helper():
         diff_pos_nk2 = broadcasted_goal - waypt_configs.position_nk2()
         broadcasted_goal_angle = np.ones(shape=waypt_configs.heading_nk1().shape, dtype=np.float32) * desired_waypt_config.heading_nk1()[0]
         diff_heading_nk1 = angle_normalize(broadcasted_goal_angle - waypt_configs.heading_nk1().numpy())
+        # if(obstacle_map is not None):
+        #     dist_nearest_obst = tf.map_fn(lambda x: obstacle_map.dist_to_nearest_obs([x]), waypt_configs.position_nk2())
+        # else:
+        #     dist_nearest_obst = np.zeros(shape=waypt_configs.position_nk2().shape, dtype=np.float32)
         diff = tf.concat([diff_pos_nk2, diff_heading_nk1], axis=2)
         idx = tf.argmin(tf.norm(diff, axis=2))
         return idx.numpy()[0]

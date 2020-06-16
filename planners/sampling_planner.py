@@ -25,17 +25,16 @@ class SamplingPlanner(Planner):
         p.planning_horizon = p.control_pipeline_params.planning_horizon
         return p
 
-    def optimize(self, start_config):
+    def optimize(self, start_config, goal_config):
         """ Optimize the objective over a trajectory
         starting from start_config.
             1. Uses a control pipeline to plan paths from start_config
             2. Evaluates the objective function on the resulting trajectories
             3. Return the minimum cost waypoint, trajectory, and cost
         """
-        obj_vals, data = self.eval_objective(start_config)
+        obj_vals, data = self.eval_objective(start_config, goal_config)
         min_idx = tf.argmin(obj_vals)
         min_cost = obj_vals[min_idx]
-
         waypts, horizons_s, trajectories_lqr, trajectories_spline, controllers = data
 
         self.opt_waypt.assign_from_config_batch_idx(waypts, min_idx)

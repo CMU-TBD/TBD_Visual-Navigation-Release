@@ -553,4 +553,8 @@ class SystemConfig(Trajectory):
             c = plt.Circle(center, radius, color=boundary_params['color'])
             ax.add_artist(c)
         else:
-            assert(False)
+            # assert(False)
+            center = self.position_nk2()[batch_idx, 0].numpy()
+            radius = boundary_params['cutoff']
+            c = plt.Circle(center, radius, color=boundary_params['color'])
+            ax.add_artist(c)

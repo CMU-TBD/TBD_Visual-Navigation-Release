@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import copy
 from objectives.objective_function import ObjectiveFunction
 from objectives.angle_distance import AngleDistance
 from objectives.goal_distance import GoalDistance
@@ -52,9 +53,14 @@ class Simulator(SimulatorHelper):
         vehicle_data = self.planner.empty_data_dict()
         end_episode = False
         commanded_actions_nkf = []
+        i = 0
         while not end_episode:
-            trajectory_segment, next_config, data, commanded_actions_1kf = self._iterate(config)
-
+            i = i + 1
+            trajectory_segment, next_config, data, commanded_actions_1kf = self._iterate(config, self.goal_config)
+            #start debug
+            if i % 100 is 0:
+                hi_gus = True
+            #end debug
             # Append to Vehicle Data
             for key in vehicle_data.keys():
                 vehicle_data[key].append(data[key])
@@ -62,9 +68,12 @@ class Simulator(SimulatorHelper):
             vehicle_trajectory.append_along_time_axis(trajectory_segment)
             commanded_actions_nkf.append(commanded_actions_1kf)
             config = next_config
+            #overwrites vehicle data with last instance before termination
+            vehicle_data_last = copy.copy(vehicle_data) #making a hardcopy
             end_episode, episode_data = self._enforce_episode_termination_conditions(vehicle_trajectory,
-                                                                                     vehicle_data,
+                                                                                     vehicle_data_last, 
                                                                                      commanded_actions_nkf)
+        print("Took",i,"iterations")
         self.vehicle_trajectory = episode_data['vehicle_trajectory']
         self.vehicle_data = episode_data['vehicle_data']
         self.vehicle_data_last_step = episode_data['vehicle_data_last_step']
@@ -74,12 +83,12 @@ class Simulator(SimulatorHelper):
         self.commanded_actions_1kf = episode_data['commanded_actions_1kf']
         self.obj_val = self._compute_objective_value(self.vehicle_trajectory)
 
-    def _iterate(self, config):
+    def _iterate(self, config, goal_config):
         """ Runs the planner for one step from config to generate a
         subtrajectory, the resulting robot config after the robot executes
         the subtrajectory, and relevant planner data"""
 
-        planner_data = self.planner.optimize(config)
+        planner_data = self.planner.optimize(config, goal_config)
         trajectory_segment, trajectory_data, commanded_actions_nkf = self._process_planner_data(config, planner_data)
         next_config = SystemConfig.init_config_from_trajectory_time_index(trajectory_segment, t=-1)
         return trajectory_segment, next_config, trajectory_data, commanded_actions_nkf
@@ -163,9 +172,15 @@ class Simulator(SimulatorHelper):
 
         if termination_time != np.inf:
             end_episode = True
-            vehicle_trajectory.clip_along_time_axis(termination_time)
-            planner_data, planner_data_last_step, last_step_data_valid = self.planner.mask_and_concat_data_along_batch_dim(planner_data,
-                                                                                                                           k=termination_time)
+            for i, condition in enumerate(p.episode_termination_reasons):
+                if(time_idxs[i].numpy() != np.inf):
+                    print("Terminated due to", condition)
+                    if(condition is "Timeout"):
+                        print("Max time:", p.episode_horizon)
+            # clipping the trajectory only ends it early, we want it to actually reach the goal
+            # vehicle_trajectory.clip_along_time_axis(termination_time)
+            planner_data, planner_data_last_step, last_step_data_valid = \
+                self.planner.mask_and_concat_data_along_batch_dim(planner_data, k=termination_time)
             commanded_actions_1kf = tf.concat(commanded_actions_nkf, axis=1)[:, :termination_time]
 
             # If all of the data was masked then
@@ -424,17 +439,11 @@ class Simulator(SimulatorHelper):
 
         obj_fn = ObjectiveFunction(p.objective_fn_params)
         if not p.avoid_obstacle_objective.empty():
-            obj_fn.add_objective(ObstacleAvoidance(
-                params=p.avoid_obstacle_objective,
-                obstacle_map=self.obstacle_map))
+            obj_fn.add_objective(ObstacleAvoidance( params=p.avoid_obstacle_objective, obstacle_map=self.obstacle_map))
         if not p.goal_distance_objective.empty():
-            obj_fn.add_objective(GoalDistance(
-                params=p.goal_distance_objective,
-                fmm_map=self.obstacle_map.fmm_map))
+            obj_fn.add_objective(GoalDistance( params=p.goal_distance_objective, fmm_map=self.obstacle_map.fmm_map))
         if not p.goal_angle_objective.empty():
-            obj_fn.add_objective(AngleDistance(
-                params=p.goal_angle_objective,
-                fmm_map=self.obstacle_map.fmm_map))
+            obj_fn.add_objective(AngleDistance( params=p.goal_angle_objective, fmm_map=self.obstacle_map.fmm_map))
         return obj_fn
 
     def _init_fmm_map(self, goal_pos_n2=None):
@@ -463,7 +472,10 @@ class Simulator(SimulatorHelper):
         each state in trajectory and the goal."""
         for objective in self.obj_fn.objectives:
             if isinstance(objective, GoalDistance):
-                dist_to_goal_nk = objective.compute_dist_to_goal_nk(trajectory)
+                # also compute euclidean distance as a heuristic
+                diff_x = trajectory.position_nk2()[0][-1][0] - self.goal_config.position_nk2()[0][0][0]
+                diff_y = trajectory.position_nk2()[0][-1][1] - self.goal_config.position_nk2()[0][0][1]
+                dist_to_goal_nk = objective.compute_dist_to_goal_nk(trajectory) + np.sqrt(diff_x**2 + diff_y**2)
         return dist_to_goal_nk
 
     def _calculate_min_obs_distances(self, vehicle_trajectory):
@@ -571,7 +583,7 @@ class Simulator(SimulatorHelper):
             self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=False)
             self._render_waypoints(ax)
         else:
-            self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=True)
+            self.vehicle_trajectory.render(ax, freq=freq, plot_quiver=False)
 
         boundary_params = {'norm': p.goal_dist_norm, 'cutoff':
                            p.goal_cutoff_dist, 'color': 'g'}
@@ -588,7 +600,10 @@ class Simulator(SimulatorHelper):
         final_pos = self.vehicle_trajectory.position_nk2()[0, -1]
         ax.set_xlabel('Cost: {cost:.3f} '.format(cost=self.obj_val) +
                       'End: [{:.2f}, {:.2f}]'.format(*final_pos), color=text_color)
-
+        final_x = final_pos.numpy()[0]
+        final_y = final_pos.numpy()[1]
+        ax.plot(final_x, final_y, text_color+'.')
+        
     def _render_waypoints(self, ax):
         # Plot the system configuration and corresponding
         # waypoint produced in the same color

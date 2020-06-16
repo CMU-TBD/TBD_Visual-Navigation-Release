@@ -42,8 +42,8 @@ def create_renderer_params():
     p.flip = False
 
     p.camera_params = DotMap(modalities=['occupancy_grid'],  # occupancy_grid, rgb, or depth
-                             width=64,
-                             height=64)
+                             width=128,
+                             height=128)
 
     # The robot is modeled as a solid cylinder
     # of height, 'height', with radius, 'radius',
@@ -90,22 +90,22 @@ def test_planner():
 
     # Spline trajectory params
     n = 1
-    dt = 1
-    k = 10
+    dt = 0.1
  
     # Goal states and initial speeds
     goal_pos_n11 = tf.constant([[[18., 16.5]]]) # Goal position (must be 1x1x2 array)
-    goal_heading_n11 = tf.constant([[[np.pi/2.]]])
+    goal_heading_n11 = tf.constant([[[0.]]])
     # Start states and initial speeds
     start_pos_n11 = tf.constant([[[8., 12.]]]) # Goal position (must be 1x1x2 array)
-    start_heading_n11 = tf.constant([[[0.]]])
-    # start_speed_nk1 = tf.ones((2, 1, 1), dtype=tf.float32) * 0.5
+    start_heading_n11 = tf.constant([[[-np.pi]]])
+    start_speed_nk1 = tf.ones((1, 1, 1), dtype=tf.float32) * 0
     # Define start and goal configurations
     # start_config = SystemConfig(dt, n, 1, speed_nk1=start_speed_nk1, variable=False)
     start_config = SystemConfig(dt, n,
                                k=1,
                                position_nk2=start_pos_n11,
                                heading_nk1=start_heading_n11,
+                               speed_nk1=start_speed_nk1,
                                variable=False)
     goal_config = SystemConfig(dt, n,
                                k=1,
@@ -114,26 +114,25 @@ def test_planner():
                                variable=True)
     #  waypts, horizons, trajectories_lqr, trajectories_spline, controllers = controller.plan(start_config, goal_config)
     splanner.simulator.simulator.reset_with_start_and_goal(start_config, goal_config)
-    splanner.eval_objective(start_config, goal_config)
+    splanner.optimize(start_config, goal_config)
     splanner.simulator.simulator.simulate()
-    splanner.optimize(start_config)
+    # splanner.optimize(start_config)
     #obj_val, [waypts, horizons, trajectories_lqr, trajectories_spline, controllers] = splanner.eval_objective(start_config, goal_config)
     opt_traj = splanner.opt_traj
-    trajectories_spline = opt_traj # for now... splanner.simulator.simulator.spline_trajectory
     # Expected objective values
     # distance_map = obstacle_map.fmm_map.fmm_distance_map.voxel_function_mn
     # Visualization
     fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
+    ax = fig.add_subplot(1,2,1)
     # obstacle_map.render(ax)
     # ax.plot(pos_nk2[0, :, 0].numpy(), pos_nk2[0, :, 1].numpy(), 'r.')
     # ax.plot(trajectory._position_nk2[0, :, 0],trajectory._position_nk2[0, :, 1], 'r-')
     splanner.simulator.simulator.render(ax)
     #ax.plot(objective[0, 0], objective[0, 1], 'k*')
     # ax.set_title('obstacle map')
-    # ax = fig.add_subplot(1,3,2)
-    # ax.plot(trajectories_spline._position_nk2[0, :, 0],trajectories_spline._position_nk2[0, :, 1], 'r-')
-    # ax.set_title('traj_spline')
+    ax = fig.add_subplot(1,2,2)
+    splanner.simulator.simulator.vehicle_trajectory.render(ax)
+    ax.set_title('traj_spline')
 
     # ax = fig.add_subplot(1,3,3)
     # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
