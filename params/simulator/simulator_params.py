@@ -26,8 +26,8 @@ def create_params():
     # Define the Objectives
 
     # Obstacle Avoidance Objective
-    p.avoid_obstacle_objective = DotMap(obstacle_margin0=0.5,
-                                        obstacle_margin1=0.7,
+    p.avoid_obstacle_objective = DotMap(obstacle_margin0=0.3,
+                                        obstacle_margin1=0.5,
                                         power=4, #exponential cost constant
                                         obstacle_cost=4.0)#scalar cost multiple
     # Angle Distance parameters

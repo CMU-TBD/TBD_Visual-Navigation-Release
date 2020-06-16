@@ -238,14 +238,10 @@ class Simulator(SimulatorHelper):
         self.vehicle_data = {}
 
     def _reset_obstacle_map(self, rng):
-        # want to use the same map
-        dummy = 1
-        # raise NotImplementedError
+        raise NotImplementedError
 
     def _update_fmm_map(self):
-        # want to use the same map
-        dummy = 1
-        # raise NotImplementedError
+        raise NotImplementedError
 
     def _reset_start_configuration(self, rng):
         """
