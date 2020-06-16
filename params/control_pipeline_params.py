@@ -35,7 +35,7 @@ def create_params():
                           linear_coeffs=np.zeros((5), dtype=np.float32))
 
     # Velocity binning parameters
-    p.binning_parameters = DotMap(num_bins=25, # 61 crashes pc with 32gb ram, 15 is slow
+    p.binning_parameters = DotMap(num_bins=20, # 61 crashes pc with 32gb ram, 15 is slow
                                   min_speed=p.system_dynamics_params.v_bounds[0],
                                   max_speed=p.system_dynamics_params.v_bounds[1])
 

@@ -56,11 +56,7 @@ class Simulator(SimulatorHelper):
         i = 0
         while not end_episode:
             i = i + 1
-            trajectory_segment, next_config, data, commanded_actions_1kf = self._iterate(config, self.goal_config)
-            #start debug
-            if i % 100 is 0:
-                hi_gus = True
-            #end debug
+            trajectory_segment, next_config, data, commanded_actions_1kf = self._iterate(config)
             # Append to Vehicle Data
             for key in vehicle_data.keys():
                 vehicle_data[key].append(data[key])
@@ -68,10 +64,10 @@ class Simulator(SimulatorHelper):
             vehicle_trajectory.append_along_time_axis(trajectory_segment)
             commanded_actions_nkf.append(commanded_actions_1kf)
             config = next_config
-            #overwrites vehicle data with last instance before termination
-            vehicle_data_last = copy.copy(vehicle_data) #making a hardcopy
+            # overwrites vehicle data with last instance before termination
+            # vehicle_data_last = copy.copy(vehicle_data) #making a hardcopy
             end_episode, episode_data = self._enforce_episode_termination_conditions(vehicle_trajectory,
-                                                                                     vehicle_data_last, 
+                                                                                     vehicle_data, 
                                                                                      commanded_actions_nkf)
         print("Took",i,"iterations")
         self.vehicle_trajectory = episode_data['vehicle_trajectory']
@@ -83,12 +79,12 @@ class Simulator(SimulatorHelper):
         self.commanded_actions_1kf = episode_data['commanded_actions_1kf']
         self.obj_val = self._compute_objective_value(self.vehicle_trajectory)
 
-    def _iterate(self, config, goal_config):
+    def _iterate(self, config):
         """ Runs the planner for one step from config to generate a
         subtrajectory, the resulting robot config after the robot executes
         the subtrajectory, and relevant planner data"""
 
-        planner_data = self.planner.optimize(config, goal_config)
+        planner_data = self.planner.optimize(config)
         trajectory_segment, trajectory_data, commanded_actions_nkf = self._process_planner_data(config, planner_data)
         next_config = SystemConfig.init_config_from_trajectory_time_index(trajectory_segment, t=-1)
         return trajectory_segment, next_config, trajectory_data, commanded_actions_nkf
@@ -463,15 +459,18 @@ class Simulator(SimulatorHelper):
 
     # Functions for computing relevant metrics
     # on robot trajectories
-    def _dist_to_goal(self, trajectory):
+    def _dist_to_goal(self, trajectory, use_euclidean=False):
         """Calculate the FMM distance between
         each state in trajectory and the goal."""
         for objective in self.obj_fn.objectives:
             if isinstance(objective, GoalDistance):
+                euclidean = 0
+                if use_euclidean:
+                    diff_x = trajectory.position_nk2()[0][-1][0] - self.goal_config.position_nk2()[0][0][0]
+                    diff_y = trajectory.position_nk2()[0][-1][1] - self.goal_config.position_nk2()[0][0][1]
+                    euclidean = np.sqrt(diff_x**2 + diff_y**2)
                 # also compute euclidean distance as a heuristic
-                diff_x = trajectory.position_nk2()[0][-1][0] - self.goal_config.position_nk2()[0][0][0]
-                diff_y = trajectory.position_nk2()[0][-1][1] - self.goal_config.position_nk2()[0][0][1]
-                dist_to_goal_nk = objective.compute_dist_to_goal_nk(trajectory) + np.sqrt(diff_x**2 + diff_y**2)
+                dist_to_goal_nk = objective.compute_dist_to_goal_nk(trajectory) + euclidean
         return dist_to_goal_nk
 
     def _calculate_min_obs_distances(self, vehicle_trajectory):

@@ -13,8 +13,8 @@ def create_params():
     p.seed = 10  # seed for the simulator (different than for numpy and tf) # default 10
 
     # Horizons in seconds
-    p.episode_horizon_s = 500 # more time to simulate a feasable path # default 200
-    p.control_horizon_s = 1.5 # default 1.5
+    p.episode_horizon_s = 200 # more time to simulate a feasable path # default 200
+    p.control_horizon_s = 5 # default 1.5
 
     # Whether to log videos taken during trajectories
     p.record_video = False
@@ -28,11 +28,11 @@ def create_params():
     # Obstacle Avoidance Objective
     p.avoid_obstacle_objective = DotMap(obstacle_margin0=0.3,
                                         obstacle_margin1=0.5,
-                                        power=4, #exponential cost constant
-                                        obstacle_cost=4.0)#scalar cost multiple
+                                        power=3, #exponential cost constant
+                                        obstacle_cost=1.0)#scalar cost multiple
     # Angle Distance parameters
     p.goal_angle_objective = DotMap(power=1,
-                                    angle_cost=.08)
+                                    angle_cost=.008)
     # Goal Distance parameters
     p.goal_distance_objective = DotMap(power=2,
                                        goal_cost=.08,

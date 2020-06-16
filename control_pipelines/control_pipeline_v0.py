@@ -117,7 +117,7 @@ class ControlPipelineV0(ControlPipelineBase):
         pipeline_data = self.helper.empty_data_dictionary()
 
         with tf.name_scope('generate_control_pipeline'):
-            if self._incorrectly_binned_data_exists():
+            if not self._incorrectly_binned_data_exists():
                 for v0 in self.start_velocities:
                     if p.verbose:
                         print('Initial Bin: v0={:.3f}'.format(v0))
