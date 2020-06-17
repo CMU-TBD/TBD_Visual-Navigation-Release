@@ -57,6 +57,7 @@ class ControlPipelineV0(ControlPipelineBase):
                 self._plan_to_a_waypoint(idx, start_config, goal_config)
             
         trajectories_lqr.update_valid_mask_nk()
+        print(waypt_configs.n)
         return waypt_configs, horizons, trajectories_lqr, trajectories_spline, controllers
 
     def _plan_to_all_waypoints(self, idx, start_config):

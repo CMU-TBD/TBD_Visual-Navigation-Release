@@ -68,7 +68,9 @@ def test_planner():
     #ax.plot(objective[0, 0], objective[0, 1], 'k*')
     # ax.set_title('obstacle map')
     ax = fig.add_subplot(1,3,3)
-    splanner.simulator.vehicle_trajectory.render(ax)
+    splanner.simulator.vehicle_trajectory.render(ax, plot_quiver=True)
+    splanner.simulator._render_waypoints(ax,plot_quiver=True, text_offset=(-1.5, 0.1))
+
 
     # ax = fig.add_subplot(1,3,3)
     # ax.plot(opt_traj._position_nk2[0, :, 0],opt_traj._position_nk2[0, :, 1], 'r-')
