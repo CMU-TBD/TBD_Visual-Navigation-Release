@@ -593,28 +593,35 @@ class Simulator(SimulatorHelper):
                      '\n Goal: [{:.2f}, {:.2f}]'.format(*goal), color=text_color)
 
         final_pos = self.vehicle_trajectory.position_nk2()[0, -1]
+        num_waypts = 0
+        if(self.vehicle_data['waypoint_config'] is not None):
+            #Nonetype wont have attribute 'n', safeguard
+            num_waypts = self.vehicle_data['waypoint_config'].n 
+
         ax.set_xlabel('Cost: {cost:.3f} '.format(cost=self.obj_val) +
                       '\n End: [{:.2f}, {:.2f}]'.format(*final_pos) + 
-                      '\n Num Waypts: [{:.2f}]'.format(self.vehicle_data['waypoint_config'].n), color=text_color)
+                      '\n Num Waypts: [{:.2f}]'.format(num_waypts), color=text_color)
         final_x = final_pos.numpy()[0]
         final_y = final_pos.numpy()[1]
         ax.plot(final_x, final_y, text_color+'.')
         
-    def _render_waypoints(self, ax, plot_quiver=False, text_offset=(0,0)):
+    def _render_waypoints(self, ax, plot_quiver=False, plot_text=True,text_offset=(0,0)):
         # Plot the system configuration and corresponding
         # waypoint produced in the same color
-        system_configs = self.vehicle_data['system_config']
-        waypt_configs = self.vehicle_data['waypoint_config']
-        cmap = matplotlib.cm.get_cmap(self.params.waypt_cmap)
-        for i, (system_config, waypt_config) in enumerate(zip(system_configs, waypt_configs)):
-            color = cmap(i / system_configs.n)
-            system_config.render(ax, batch_idx=0, plot_quiver=plot_quiver,
-                                 marker='o', color=color)
+        if(self.vehicle_data['waypoint_config'] is not None):
+            system_configs = self.vehicle_data['system_config']
+            waypt_configs = self.vehicle_data['waypoint_config']
+            cmap = matplotlib.cm.get_cmap(self.params.waypt_cmap)
+            for i, (system_config, waypt_config) in enumerate(zip(system_configs, waypt_configs)):
+                color = cmap(i / system_configs.n)
+                system_config.render(ax, batch_idx=0, plot_quiver=plot_quiver,
+                                    marker='o', color=color)
 
-            # Render the waypoint's number at each
-            # waypoint's location
-            pos_2 = system_config.position_nk2()[0, 0].numpy()
-            ax.text(pos_2[0]+text_offset[0], pos_2[1]+text_offset[1], str(i), color=color)
+                # Render the waypoint's number at each
+                # waypoint's location
+                pos_2 = system_config.position_nk2()[0, 0].numpy()
+                if(plot_text):
+                    ax.text(pos_2[0]+text_offset[0], pos_2[1]+text_offset[1], str(i), color=color)
 
     def _render_velocities(self, ax0, ax1):
         speed_k = self.vehicle_trajectory.speed_nk1()[0, :, 0].numpy()
